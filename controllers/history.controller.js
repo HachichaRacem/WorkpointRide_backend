@@ -1,4 +1,4 @@
-const History = require('../models/history.model');
+const History = require ('../models/history.model');
 
 // Controller functions for handling history CRUD operations
 exports.getAllHistories = async (req, res) => {
