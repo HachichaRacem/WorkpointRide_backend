@@ -31,6 +31,8 @@ const userSchema = new mongoose.Schema({
     minLength:6,
   },
 
+  photo:String,
+
   role: {
     type: String,
     enum: ['admin', 'user'],
@@ -58,7 +60,7 @@ const userSchema = new mongoose.Schema({
 
   recentItineraries: [{
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Itinerary',
+    ref: 'Route',
   }],
 });
 
