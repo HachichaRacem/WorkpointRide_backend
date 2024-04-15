@@ -31,12 +31,15 @@ const userSchema = new mongoose.Schema({
     minLength:6,
   },
 
-  photo:String,
-
   role: {
     type: String,
     enum: ['admin', 'user'],
     default: 'user'
+  },
+
+  isBlocked:{
+    type:Boolean,
+    default: false
   },
   // Other user fields...
 
@@ -60,7 +63,7 @@ const userSchema = new mongoose.Schema({
 
   recentItineraries: [{
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Route',
+    ref: 'Itinerary',
   }],
 });
 
