@@ -1,60 +1,75 @@
-const History = require ('../models/history.model');
+const historyService = require("../services/history.services");
+const express = require("express");
 
-// Controller functions for handling history CRUD operations
-exports.getAllHistories = async (req, res) => {
+const router = express.Router();
+
+router.post("/", async (req, res) => {
   try {
-    const histories = await History.find();
+    const newHistory = await historyService.createHistory(req.body);
+    if (!newHistory)
+      return res.status(500).json({ error: "Could not create history" });
+    res.json({ status: "Created", history: newHistory });
+  } catch (e) {
+    console.log("[HISTORY]: %s \n %s", e, e.stack);
+    res.status(500).json({ error: e.message });
+  }
+});
+
+router.get("/", async (req, res) => {
+  try {
+    const histories = await historyService.getAllHistories();
     res.json(histories);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
+  } catch (e) {
+    console.log("[HISTORY]: %s \n %s", e, e.stack);
+    res.status(500).json({ error: e.message });
   }
-};
+});
 
-exports.getHistoryById = async (req, res) => {
+router.get("/:id", async (req, res) => {
   try {
-    const history = await History.findById(req.params.id);
-    if (!history) {
-      return res.status(404).json({ message: 'History not found' });
-    }
+    const history = await historyService.getHistoryByID(req.params.id);
+    if (!history)
+      return res
+        .status(404)
+        .json({ message: "No history was found with that ID" });
     res.json(history);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
+  } catch (e) {
+    console.log("[HISTORY]: %s \n %s", e, e.stack);
+    res.status(500).json({ error: e.message });
   }
-};
+});
 
-exports.createHistory = async (req, res) => {
-  const history = new History(req.body);
+router.put("/:id", async (req, res) => {
   try {
-    const newHistory = await history.save();
-    res.status(201).json(newHistory);
-  } catch (error) {
-    res.status(400).json({ message: error.message });
+    const updatedHistory = await historyService.updateHistoryByID(
+      req.params.id,
+      req.body
+    );
+    if (!updatedHistory)
+      return res
+        .status(500)
+        .json({ error: "History was not found to be updated" });
+    res.json({ status: "Updated", history: updatedHistory });
+  } catch (e) {
+    console.log("[HISTORY]: %s \n %s", e, e.stack);
+    res.status(500).json({ error: e.message });
   }
-};
+});
 
-exports.updateHistoryById = async (req, res) => {
+router.delete("/:id", async (req, res) => {
   try {
-    const history = await History.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-      runValidators: true,
-    });
-    if (!history) {
-      return res.status(404).json({ message: 'History not found' });
-    }
-    res.json(history);
-  } catch (error) {
-    res.status(400).json({ message: error.message });
+    const deletedHistory = await historyService.deleteHistoryById(
+      req.params.id
+    );
+    if (!deletedHistory)
+      return res
+        .status(500)
+        .json({ error: "History was not found to be deleted" });
+    res.json({ status: "Deleted", history: deletedHistory });
+  } catch (e) {
+    console.log("[HISTORY]: %s \n %s", e, e.stack);
+    res.status(500).json({ error: e.message });
   }
-};
+});
 
-exports.deleteHistoryById = async (req, res) => {
-  try {
-    const history = await History.findByIdAndDelete(req.params.id);
-    if (!history) {
-      return res.status(404).json({ message: 'History not found' });
-    }
-    res.json({ message: 'History deleted successfully' });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
+module.exports = router;

@@ -70,7 +70,7 @@ const userSchema = new mongoose.Schema({
 
 
 
-userSchema.pre('save',async function(){
+/*userSchema.pre('save',async function(){
   try{
     var user =this;
     const salt = await(bcrypt.genSalt(10));
@@ -86,8 +86,6 @@ const isMatch =await bcrypt.compare(userPassword,this.password);
   }catch(error){
     throw error;
   }
-}
+}*/
 
-const User = mongoose.model('User', userSchema);
-
-module.exports = User;
+module.exports = mongoose.model('User', userSchema);

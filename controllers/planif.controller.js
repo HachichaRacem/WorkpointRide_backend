@@ -1,72 +1,73 @@
 // planif.controller.js
-const Planif = require('../models/planif.model');
+const planifServices = require("../services/planif.services");
+const express = require("express");
 
-// Get all planifs
-const getAllPlanifs = async (req, res) => {
-    try {
-        const planifs = await Planif.find();
-        res.json(planifs);
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-};
+const router = express.Router();
 
-// Get planif by ID
-const getPlanifById = async (req, res) => {
-    try {
-        const planif = await Planif.findById(req.params.id);
-        if (!planif) {
-            return res.status(404).json({ message: 'Planif not found' });
-        }
-        res.json(planif);
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-};
+router.get("/", async (req, res) => {
+  try {
+    res.json(await planifServices.getAllPlanifs());
+  } catch (e) {
+    console.log("[PLANIFS]: %s \n %s", e, e.stack);
+    res.status(500).json({ error: e.message });
+  }
+});
 
-// Create a new planif
-const createPlanif = async (req, res) => {
-    try {
-        const { userId, routesId, startTime, daysOfWeek, availablePlaces } = req.body;
-        const planif = new Planif({ userId, routesId, startTime, daysOfWeek, availablePlaces });
-        await planif.save();
-        res.status(201).json({ message: 'Planif created successfully', planif });
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-};
+router.get("/:id", async (req, res) => {
+  try {
+    const planif = await planifServices.getPlanifByID(req.params.id);
+    if (!planif)
+      return res
+        .status(500)
+        .json({ error: "No planif was found with that ID" });
+    res.json(planif);
+  } catch (e) {
+    console.log("[PLANIFS]: %s \n %s", e, e.stack);
+    res.status(500).json({ error: e.message });
+  }
+});
 
-// Update planif by ID
-const updatePlanifById = async (req, res) => {
-    try {
-        const { userId, routesId, startTime, daysOfWeek, availablePlaces } = req.body;
-        const updatedPlanif = await Planif.findByIdAndUpdate(req.params.id, { userId, routesId, startTime, daysOfWeek, availablePlaces }, { new: true });
-        if (!updatedPlanif) {
-            return res.status(404).json({ message: 'Planif not found' });
-        }
-        res.json({ message: 'Planif updated successfully', planif: updatedPlanif });
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-};
+router.delete("/:id", async (req, res) => {
+  try {
+    const deletedPlanif = await planifServices.deletePlanifByID(req.params.id);
+    if (!deletedPlanif)
+      return res
+        .status(500)
+        .json({ error: "No planif was found with that ID to be deleted" });
+    res.json({ status: "Deleted", planif: deletedPlanif });
+  } catch (e) {
+    console.log("[PLANIFS]: %s \n %s", e, e.stack);
+    res.status(500).json({ error: e.message });
+  }
+});
 
-// Delete planif by ID
-const deletePlanifById = async (req, res) => {
-    try {
-        const deletedPlanif = await Planif.findByIdAndDelete(req.params.id);
-        if (!deletedPlanif) {
-            return res.status(404).json({ message: 'Planif not found' });
-        }
-        res.json({ message: 'Planif deleted successfully', planif: deletedPlanif });
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-};
+router.put("/:id", async (req, res) => {
+  try {
+    const updatedPlanif = await planifServices.updatePlanifByID(
+      req.params.id,
+      req.body
+    );
+    if (!updatedPlanif)
+      return res
+        .status(500)
+        .json({ error: "No planif was found with that ID to be updated" });
+    res.json({ status: "Updated", planif: updatedPlanif });
+  } catch (e) {
+    console.log("[PLANIFS]: %s \n %s", e, e.stack);
+    res.status(500).json({ error: e.message });
+  }
+});
 
-module.exports = {
-    getAllPlanifs,
-    getPlanifById,
-    createPlanif,
-    updatePlanifById,
-    deletePlanifById
-};
+router.post("/", async (req, res) => {
+  try {
+    const newPlanif = await planifServices.createPlanif(req.body);
+    if (!newPlanif)
+      return res.status(500).json({ error: "Could not create a new planif" });
+    res.json({ status: "Created", planif: newPlanif });
+  } catch (e) {
+    console.log("[PLANIFS]: %s \n %s", e, e.stack);
+    res.status(500).json({ error: e.message });
+  }
+});
+
+module.exports = router;

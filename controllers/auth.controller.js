@@ -1,3 +1,7 @@
+/* Everything related to the user and authentification is now in the user related files
+
+
+
 // auth.controller.js
 
 const jwt = require('jsonwebtoken');
@@ -57,3 +61,4 @@ const registerUser = async (req, res) => {
 };
 
 module.exports = { loginUser, registerUser };
+*/

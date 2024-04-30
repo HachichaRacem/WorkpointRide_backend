@@ -1,69 +1,86 @@
-const User = require('../models/user.model');
-const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
+//const User = require('../models/user.model');
 
-// Register a new user
-const registerUser = async (req, res) => {
-  const { firstName, lastName, email, phoneNumber, password } = req.body;
+const userService = require("../services/user.services");
+const express = require("express");
+const router = express.Router();
 
+// Fetches user by email
+// USAGE: API_URL/api/users/getUser/example@example.com
+router.get("/getUser/:email", async (req, res) => {
   try {
-    const existingUser = await User.findOne({ email });
-
-    if (existingUser) {
-      return res.status(400).json({ message: 'User already exists' });
-    }
-
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
-
-    const newUser = new User({
-      firstName,
-      lastName,
-      email,
-      phoneNumber,
-      password: hashedPassword,
-    });
-
-    await newUser.save();
-
-    res.status(201).json({ message: 'User registered successfully' });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-};
-
-// User login
-const loginUser = async (req, res) => {
-  const { email, password } = req.body;
-
-  try {
-    const user = await User.findOne({ email });
-
+    const email = req.params.email;
+    const user = await userService.getUser(email);
     if (!user) {
-      return res.status(401).json({ message: 'Invalid email or password' });
+      return res.status(404).json({ error: "User not found" });
     }
-
-    const isMatch = await bcrypt.compare(password, user.password);
-
-    if (!isMatch) {
-      return res.status(401).json({ message: 'Invalid email or password' });
-    }
-
-    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
-    const refresh_token = jwt.sign(
-      {
-        id: user._id,
-      },
-      process.env.JWT_SECRET,
-      {
-        expiresIn: "1d",
-      }
-    );
-    res.json({ token,refresh_token });
+    res.json(user);
   } catch (error) {
+    console.log("[USER] : %s\n%s", error, error.stack);
     res.status(500).json({ error: error.message });
   }
-};
+});
+
+// Registers new user
+// UASGE: API_URL/api/users/register
+router.post("/register", async (req, res) => {
+  try {
+    const newUser = await userService.registerUser(req.body);
+    if (!newUser)
+      return res.status(500).json({ error: "Could not create new user" });
+    return res.json({ status: "Created", user: newUser });
+  } catch (error) {
+    console.log("[USER]: %s\n%s", error, error.stack);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Logs existing user in
+// USAGE: API_URL/api/users/login
+router.post("/login", async (req, res) => {
+  try {
+    res.json(await userService.loginUser(req.body));
+  } catch (error) {
+    console.log("[USER]: %s\n%s", error, error.stack);
+    res.status(400).json({ error: error.message });
+  }
+});
+
+// Updates existing user
+// API_URL/api/users/example@example.com
+router.put("/:email", async (req, res) => {
+  try {
+    const updatedMember = await userService.updateUser(
+      req.params.email,
+      req.body
+    );
+    if (!updatedMember)
+      return res
+        .status(404)
+        .json({ error: "No user was found with that email" });
+    return res.json({ status: "Updated", user: updatedUser });
+  } catch (error) {
+    console.log("[USER]: %s\n%s", error, error.stack);
+    res.status(400).json({ error: error.message });
+  }
+});
+
+// Deletes an existing user
+// USAGE: API_URL/api/users/exmaple@example.com
+router.delete("/:email", async (req, res) => {
+  try {
+    const deletedUser = await userService.deleteUser(req.body);
+    if (!deletedUser)
+      return res
+        .status(404)
+        .json({ error: "No user was found with that email" });
+    return res.json({ status: "Deleted", user: deletedUser });
+  } catch (error) {
+    console.log("[USER]: %s\n%s", error, error.stack);
+    res.status(400).json({ error: error.message });
+  }
+});
+
+/*
 exports.refreshToken = async (req, res) => {
   const refresh_token = req.body.refreshToken;
   if (!refresh_token) {
@@ -278,6 +295,7 @@ const refreshToken = async (req, res) => {
     } catch (error) {
       res.status(500).json({ error: error.message });
     }
-  };
+  };*/
 
-module.exports = { registerUser, loginUser, getAllUsers, createUserProfile, getUserProfileById, updateUserProfileById, deleteUserProfileById};
+//module.exports = { registerUser, loginUser, getAllUsers, createUserProfile, getUserProfileById, updateUserProfileById, deleteUserProfileById};
+module.exports = router;

@@ -1,69 +1,71 @@
-const Vehicle = require('../models/vehicle.model');
+const vehServices = require("../services/vehicle.services");
+const express = require("express");
+const router = express.Router();
 
-// Get all vehicles
-const getAllVehicles = async (req, res) => {
+router.get("/", async (req, res) => {
   try {
-    const vehicles = await Vehicle.find();
-    res.json(vehicles);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.json(await vehServices.getAllVehicles());
+  } catch (e) {
+    console.log("[VEHICLE]: %s \n %s", e, e.stack);
+    res.status(500).json({ error: e.message });
   }
-};
+});
 
-// Get vehicle by ID
-const getVehicleById = async (req, res) => {
+router.get("/:id", async (req, res) => {
   try {
-    const vehicle = await Vehicle.findById(req.params.id);
-    if (!vehicle) {
-      return res.status(404).json({ message: 'Vehicle not found' });
-    }
+    const vehicle = await vehServices.getVehicleByID(req.params.id);
+    if (!vehicle)
+      return res
+        .status(500)
+        .json({ error: "No vehicle was found with that ID" });
     res.json(vehicle);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
+  } catch (e) {
+    console.log("[VEHICLE]: %s \n %s", e, e.stack);
+    res.status(500).json({ error: e.message });
   }
-};
+});
 
-// Create a new vehicle
-const createVehicle = async (req, res) => {
+router.delete("/:id", async (req, res) => {
   try {
-    const vehicle = new Vehicle(req.body);
-    await vehicle.save();
-    res.status(201).json(vehicle);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
+    const deletedVehicle = await vehServices.deleteVehicleByID(req.params.id);
+    if (!deletedVehicle)
+      return res
+        .status(500)
+        .json({ error: "No vehicle was found with that ID to be deleted" });
+    res.json({ status: "Deleted", vehicle: deletedVehicle });
+  } catch (e) {
+    console.log("[VEHICLE]: %s \n %s", e, e.stack);
+    res.status(500).json({ error: e.message });
   }
-};
+});
 
-// Update vehicle by ID
-const updateVehicleById = async (req, res) => {
+router.put("/:id", async (req, res) => {
   try {
-    const vehicle = await Vehicle.findByIdAndUpdate(req.params.id, req.body, { new: true });
-    if (!vehicle) {
-      return res.status(404).json({ message: 'Vehicle not found' });
-    }
-    res.json(vehicle);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
+    const updatedVehicle = await vehServices.updateVehicleByID(
+      req.params.id,
+      req.body
+    );
+    if (!updatedVehicle)
+      return res
+        .status(500)
+        .json({ error: "No vehicle was found with that ID to be updated" });
+    res.json({ status: "Updated", vehicle: updatedVehicle });
+  } catch (e) {
+    console.log("[VEHICLES]: %s \n %s", e, e.stack);
+    res.status(500).json({ error: e.message });
   }
-};
+});
 
-// Delete vehicle by ID
-const deleteVehicleById = async (req, res) => {
+router.post("/", async (req, res) => {
   try {
-    const vehicle = await Vehicle.findByIdAndDelete(req.params.id);
-    if (!vehicle) {
-      return res.status(404).json({ message: 'Vehicle not found' });
-    }
-    res.json({ message: 'Vehicle deleted successfully' });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
+    const newVehicle = await vehServices.createVehicle(req.body);
+    if (!newVehicle)
+      return res.status(500).json({ error: "Could not create a new vehicle" });
+    res.json({ status: "Created", vehicle: newVehicle });
+  } catch (e) {
+    console.log("[VEHICLES]: %s \n %s", e, e.stack);
+    res.status(500).json({ error: e.message });
   }
-};
+});
 
-module.exports = {
-  getAllVehicles,
-  getVehicleById,
-  createVehicle,
-  updateVehicleById,
-  deleteVehicleById,
-};
+module.exports = router;
