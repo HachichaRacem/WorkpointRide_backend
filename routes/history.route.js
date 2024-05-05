@@ -1,12 +1,12 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const historyController = require('../controllers/history.controller');
+const historyController = require("../controllers/history.controller");
+const isAuth = require("../middleware/auth.middleware");
 
-// Define routes for history CRUD operations
-router.get('/', historyController.getAllHistories);
-router.get('/:id', historyController.getHistoryById);
-router.post('/', historyController.createHistory);
-router.put('/:id', historyController.updateHistoryById);
-router.delete('/:id', historyController.deleteHistoryById);
+router.get("/", isAuth, historyController.getAllHistories);
+router.get("/:userID", isAuth, historyController.getHistoryByUser);
+router.post("/", isAuth, historyController.createHistory);
+router.put("/:id", isAuth, historyController.updateHistoryByID);
+router.delete("/:id", isAuth, historyController.deleteHistoryByID);
 
 module.exports = router;

@@ -3,7 +3,7 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 
 // User login
-async function loginUser(params) {
+exports.loginUser = async (params) => {
   if (!params.email || !params.password) {
     throw Error("The request is missing the email or the password");
   }
@@ -28,10 +28,10 @@ async function loginUser(params) {
     }
   );
   return { user: user, accessToken: token, refreshToken: refresh_token };
-}
+};
 
 // User register
-async function registerUser(params) {
+exports.registerUser = async (params) => {
   if (
     !params.firstName ||
     !params.lastName ||
@@ -56,29 +56,21 @@ async function registerUser(params) {
     password: hashedPassword,
   });
   return await newUser.save();
-}
+};
 
 // Updating existing user
-async function updateUser(email, updates) {
+exports.updateUser = async (email, updates) => {
   if (!email || !updates) throw Error("Missing parameters");
   return await UserModel.findOneAndUpdate({ email }, updates);
-}
+};
 
 // Deleting existing user
-async function deleteUser(email) {
+exports.deleteUser = async (email) => {
   if (!email) throw Error("Invalid email entered");
   return await UserModel.findOneAndDelete({ email });
-}
+};
 
 // Get user
-async function getUser(email) {
+exports.getUser = async (email) => {
   return await UserModel.findOne({ email });
-}
-
-module.exports = {
-  registerUser,
-  getUser,
-  loginUser,
-  deleteUser,
-  updateUser,
 };

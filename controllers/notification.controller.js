@@ -1,20 +1,19 @@
 const notifServices = require("../services/notification.services");
-const express = require("express");
 
-const router = express.Router();
-
-router.get("/", async (req, res) => {
+exports.getAllNotifications = async (req, res) => {
   try {
     res.json(await notifServices.getAllNotifications());
   } catch (e) {
     console.log("[NOTIFICATION]: %s \n %s", e, e.stack);
     res.status(500).json({ error: e.message });
   }
-});
+};
 
-router.get("/:id", async (req, res) => {
+exports.getNotificationByUser = async (req, res) => {
   try {
-    const notification = await notifServices.getNotificationByID(req.params.id);
+    const notification = await notifServices.getNotificationByUser(
+      req.params.userID
+    );
     if (!notification)
       return res.status(404).json({ error: "No notification was found" });
     res.json(notification);
@@ -22,9 +21,9 @@ router.get("/:id", async (req, res) => {
     console.log("[NOTIFICATION]: %s \n %s", e, e.stack);
     res.status(500).json({ error: e.message });
   }
-});
+};
 
-router.post("/", async (req, res) => {
+exports.createNotification = async (req, res) => {
   try {
     const newNotif = await notifServices.createNotification(req.body);
     if (!newNotif)
@@ -36,26 +35,9 @@ router.post("/", async (req, res) => {
     console.log("[NOTIFICATION]: %s \n %s", e, e.stack);
     res.status(500).json({ error: e.message });
   }
-});
+};
 
-router.put("/:id", async (req, res) => {
-  try {
-    const updatedNotif = await notifServices.updateNotificationByID(
-      req.params.id,
-      req.body
-    );
-    if (!updatedNotif)
-      return res.status(500).json({
-        error: "No notification with that ID was found to be updated",
-      });
-    res.json({ status: "Updated", notification: updatedNotif });
-  } catch (e) {
-    console.log("[NOTIFICATION]: %s \n %s", e, e.stack);
-    res.status(500).json({ error: e.message });
-  }
-});
-
-router.delete("/:id", async (req, res) => {
+exports.deleteNotificationByID = async (req, res) => {
   try {
     const deletedNotif = await notifServices.deleteNotificationByID(
       req.params.id
@@ -69,6 +51,4 @@ router.delete("/:id", async (req, res) => {
     console.log("[NOTIFICATION]: %s \n %s", e, e.stack);
     res.status(500).json({ error: e.message });
   }
-});
-
-module.exports = router;
+};

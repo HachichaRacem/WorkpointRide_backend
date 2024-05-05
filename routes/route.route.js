@@ -1,12 +1,12 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const routeController = require('../controllers/route.controller');
+const routeController = require("../controllers/route.controller");
+const isAuth = require("../middleware/auth.middleware");
 
-// Routes for route CRUD operations
-router.post('/', routeController.createRoute);
-router.get('/', routeController.getAllRoutes);
-router.get('/:id', routeController.getRouteById);
-router.put('/:id', routeController.updateRouteById);
-router.delete('/:id', routeController.deleteRouteById);
+router.post("/", isAuth, routeController.createRoute);
+router.get("/", isAuth, routeController.getAllRoutes);
+router.get("/:userID", isAuth, routeController.getRouteByUser);
+router.put("/:id", isAuth, routeController.updateRouteByID);
+router.delete("/:id", isAuth, routeController.deleteRouteByID);
 
 module.exports = router;

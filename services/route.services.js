@@ -20,9 +20,9 @@ async function getAllRoutes() {
   return await routeModel.find();
 }
 
-async function getRouteByID(id) {
-  if (!id || id.length != 24) throw Error("Invalid ID was sent");
-  return await routeModel.findById(id);
+async function getRouteByUser(userID) {
+  if (!userID || userID.length != 24) throw Error("Invalid ID was sent");
+  return await routeModel.findOne({ user: userID });
 }
 
 async function updateRouteByID(id, updates) {
@@ -38,7 +38,7 @@ async function deleteRouteByID(id) {
 module.exports = {
   createRoute,
   getAllRoutes,
-  getRouteByID,
+  getRouteByUser,
   updateRouteByID,
   deleteRouteByID,
 };

@@ -1,19 +1,17 @@
 const vehServices = require("../services/vehicle.services");
-const express = require("express");
-const router = express.Router();
 
-router.get("/", async (req, res) => {
+exports.getAllVehicles = async (req, res) => {
   try {
     res.json(await vehServices.getAllVehicles());
   } catch (e) {
     console.log("[VEHICLE]: %s \n %s", e, e.stack);
     res.status(500).json({ error: e.message });
   }
-});
+};
 
-router.get("/:id", async (req, res) => {
+exports.getVehicleByUser = async (req, res) => {
   try {
-    const vehicle = await vehServices.getVehicleByID(req.params.id);
+    const vehicle = await vehServices.getVehicleByUser(req.params.userID);
     if (!vehicle)
       return res
         .status(500)
@@ -23,9 +21,9 @@ router.get("/:id", async (req, res) => {
     console.log("[VEHICLE]: %s \n %s", e, e.stack);
     res.status(500).json({ error: e.message });
   }
-});
+};
 
-router.delete("/:id", async (req, res) => {
+exports.deleteVehicleByID = async (req, res) => {
   try {
     const deletedVehicle = await vehServices.deleteVehicleByID(req.params.id);
     if (!deletedVehicle)
@@ -37,9 +35,9 @@ router.delete("/:id", async (req, res) => {
     console.log("[VEHICLE]: %s \n %s", e, e.stack);
     res.status(500).json({ error: e.message });
   }
-});
+};
 
-router.put("/:id", async (req, res) => {
+exports.updateVehicleByID = async (req, res) => {
   try {
     const updatedVehicle = await vehServices.updateVehicleByID(
       req.params.id,
@@ -54,9 +52,9 @@ router.put("/:id", async (req, res) => {
     console.log("[VEHICLES]: %s \n %s", e, e.stack);
     res.status(500).json({ error: e.message });
   }
-});
+};
 
-router.post("/", async (req, res) => {
+exports.createVehicle = async (req, res) => {
   try {
     const newVehicle = await vehServices.createVehicle(req.body);
     if (!newVehicle)
@@ -66,6 +64,4 @@ router.post("/", async (req, res) => {
     console.log("[VEHICLES]: %s \n %s", e, e.stack);
     res.status(500).json({ error: e.message });
   }
-});
-
-module.exports = router;
+};

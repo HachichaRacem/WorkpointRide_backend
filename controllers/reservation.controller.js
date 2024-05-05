@@ -1,20 +1,19 @@
 const resServices = require("../services/reservation.services");
-const express = require("express");
-const router = express.Router();
-// Get all reservations
 
-router.get("/", async (req, res) => {
+exports.getAllReservations = async (req, res) => {
   try {
     res.json(await resServices.getAllReservations());
   } catch (e) {
     console.log("[RESERVATION]: %s \n %s", e, e.stack);
     res.status(500).json({ error: e.message });
   }
-});
+};
 
-router.get("/:id", async (req, res) => {
+exports.getReservationByUser = async (req, res) => {
   try {
-    const reservation = await resServices.getReservationByID(req.params.id);
+    const reservation = await resServices.getReservationByUser(
+      req.params.userID
+    );
     if (!reservation)
       return res
         .status(500)
@@ -24,9 +23,9 @@ router.get("/:id", async (req, res) => {
     console.log("[RESERVATION]: %s \n %s", e, e.stack);
     res.status(500).json({ error: e.message });
   }
-});
+};
 
-router.post("/", async (req, res) => {
+exports.createReservation = async (req, res) => {
   try {
     const newRes = await resServices.createReservation(req.body);
     if (!newRes)
@@ -38,9 +37,9 @@ router.post("/", async (req, res) => {
     console.log("[RESERVATION]: %s \n %s", e, e.stack);
     res.status(500).json({ error: e.message });
   }
-});
+};
 
-router.delete("/:id", async (req, res) => {
+exports.deleteReservationByID = async (req, res) => {
   try {
     const deletedRes = await resServices.deleteReservationByID(req.params.id);
     if (!deletedRes)
@@ -52,9 +51,9 @@ router.delete("/:id", async (req, res) => {
     console.log("[RESERVATION]: %s \n %s", e, e.stack);
     res.status(500).json({ error: e.message });
   }
-});
+};
 
-router.put("/:id", async (req, res) => {
+exports.updateReservationByID = async (req, res) => {
   try {
     const updatedRes = await resServices.updateReservationByID(
       req.params.id,
@@ -69,19 +68,4 @@ router.put("/:id", async (req, res) => {
     console.log("[RESERVATION]: %s \n %s", e, e.stack);
     res.status(500).json({ error: e.message });
   }
-});
-
-// Get reservation by ID
-const getReservationById = async (req, res) => {
-  try {
-    const reservation = await Reservation.findById(req.params.id);
-    if (!reservation) {
-      return res.status(404).json({ message: "Reservation not found" });
-    }
-    res.json(reservation);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
 };
-
-module.exports = router;

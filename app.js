@@ -3,32 +3,26 @@ require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
 
-// Import controllers
-const userController = require("./controllers/user.controller");
-const historyController = require("./controllers/history.controller");
-const routeController = require("./controllers/route.controller");
-const notificationController = require("./controllers/notification.controller");
-const reservationController = require("./controllers/reservation.controller");
-const planifController = require("./controllers/planif.controller");
-const vehicleController = require("./controllers/vehicle.controller");
+const routeRouter = require("./routes/route.route");
+const scheduleRouter = require("./routes/schedule.route");
+const historyRouter = require("./routes/history.route");
+const notificationRouter = require("./routes/notification.route");
+const reservationRouter = require("./routes/reservation.route");
+const vehicleRouter = require("./routes/vehicle.route");
+const userRouter = require("./routes/user.route");
 
 const app = express();
 app.use(express.json());
 
-// Controllers
-app.use("/api/users", userController);
-app.use("/api/history", historyController);
-app.use("/api/routes", routeController);
-app.use("/api/notifications", notificationController);
-app.use("/api/reservations", reservationController);
-app.use("/api/planifs", planifController);
-app.use("/api/vehicles", vehicleController);
+app.use("/api/users", userRouter);
+app.use("/api/history", historyRouter);
+app.use("/api/routes", routeRouter);
+app.use("/api/notifications", notificationRouter);
+app.use("/api/reservations", reservationRouter);
+app.use("/api/schedules", scheduleRouter);
+app.use("/api/vehicles", vehicleRouter);
 
 const PORT = process.env.PORT || 5000;
-
-app.get("/", (req, res) => {
-  res.json("Hello World");
-});
 
 mongoose
   .connect(process.env.DB_KEY)

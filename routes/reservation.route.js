@@ -1,13 +1,12 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const isAuth = require('../middleware/auth.middleware');
-const reservationController = require('../controllers/reservation.controller');
+const isAuth = require("../middleware/auth.middleware");
+const reservationController = require("../controllers/reservation.controller");
 
-
-router.get('/', isAuth, reservationController.getAllReservations);
-router.get('/:id', reservationController.getReservationById);
-router.post('/create', reservationController.createReservation);
-router.put('/update/:id', reservationController.updateReservationById);
-router.delete('/delete/:id', reservationController.deleteReservationById);
+router.get("/", isAuth, reservationController.getAllReservations);
+router.get("/:userID", isAuth, reservationController.getReservationByUser);
+router.post("/", isAuth, reservationController.createReservation);
+router.put("/:id", isAuth, reservationController.updateReservationByID);
+router.delete("/:id", isAuth, reservationController.deleteReservationByID);
 
 module.exports = router;

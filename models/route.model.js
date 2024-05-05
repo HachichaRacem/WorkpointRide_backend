@@ -66,62 +66,58 @@
 
 const mongoose = require("mongoose");
 
-const RouteSchema = new mongoose.Schema({
-  user: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "User",
-    required: true,
-  },
-  startPoint: {
+const RouteSchema = new mongoose.Schema(
+  {
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+    startPoint: {
+      type: {
+        type: String,
+        enum: ["Point"],
+        required: true,
+      },
+      coordinates: {
+        type: [Number],
+        required: true,
+      },
+    },
+    endPoint: {
+      type: {
+        type: String,
+        enum: ["Point"],
+        required: true,
+      },
+      coordinates: {
+        type: [Number],
+        required: true,
+      },
+    },
+
+    duration: {
+      type: Number,
+      required: true,
+    },
+    distance: {
+      type: Number,
+      required: true,
+    },
     type: {
       type: String,
-      enum: ["Point"],
+      enum: ["aller", "retour"],
       required: true,
     },
-    coordinates: {
-      type: [Number],
-      required: true,
-    },
+    polyline: [
+      {
+        latitude: { type: Number, required: true },
+        longitude: { type: Number, required: true },
+      },
+    ],
   },
-  endPoint: {
-    type: {
-      type: String,
-      enum: ["Point"],
-      required: true,
-    },
-    coordinates: {
-      type: [Number],
-      required: true,
-    },
-  },
-  startTime: {
-    type: Date,
-    required: true,
-  },
-  daysOfWeek: {
-    type: [String],
-    required: true,
-  },
-  duration: {
-    type: Number,
-    required: true,
-  },
-  distance: {
-    type: Number,
-    required: true,
-  },
-  type: {
-    type: String,
-    enum: ["aller", "retour"],
-    required: true,
-  },
-  polyline: [
-    {
-      latitude: { type: Number, required: true },
-      longitude: { type: Number, required: true },
-    },
-  ],
-});
+  { timestamps: true },
+);
 
 // Indexes
 RouteSchema.index({ startPoint: "2dsphere" });

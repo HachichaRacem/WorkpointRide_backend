@@ -1,10 +1,11 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const notificationController = require('../controllers/notification.controller');
+const isAuth = require("../middleware/auth.middleware");
+const notificationController = require("../controllers/notification.controller");
 
-// Define routes for notification CRUD operations
-router.get('/:id', notificationController.getNotificationById);
-router.get('/', notificationController.getAllNotifications);
-router.delete('/:id', notificationController.deleteNotificationById);
+router.post("/", isAuth, notificationController.createNotification);
+router.get("/:userID", isAuth, notificationController.getNotificationByUser);
+router.get("/", isAuth, notificationController.getAllNotifications);
+router.delete("/:id", isAuth, notificationController.deleteNotificationByID);
 
 module.exports = router;

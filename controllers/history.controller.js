@@ -1,9 +1,6 @@
 const historyService = require("../services/history.services");
-const express = require("express");
 
-const router = express.Router();
-
-router.post("/", async (req, res) => {
+exports.createHistory = async (req, res) => {
   try {
     const newHistory = await historyService.createHistory(req.body);
     if (!newHistory)
@@ -13,9 +10,9 @@ router.post("/", async (req, res) => {
     console.log("[HISTORY]: %s \n %s", e, e.stack);
     res.status(500).json({ error: e.message });
   }
-});
+};
 
-router.get("/", async (req, res) => {
+exports.getAllHistories = async (req, res) => {
   try {
     const histories = await historyService.getAllHistories();
     res.json(histories);
@@ -23,11 +20,11 @@ router.get("/", async (req, res) => {
     console.log("[HISTORY]: %s \n %s", e, e.stack);
     res.status(500).json({ error: e.message });
   }
-});
+};
 
-router.get("/:id", async (req, res) => {
+exports.getHistoryByUser = async (req, res) => {
   try {
-    const history = await historyService.getHistoryByID(req.params.id);
+    const history = await historyService.getHistoryByUser(req.params.userID);
     if (!history)
       return res
         .status(404)
@@ -37,9 +34,9 @@ router.get("/:id", async (req, res) => {
     console.log("[HISTORY]: %s \n %s", e, e.stack);
     res.status(500).json({ error: e.message });
   }
-});
+};
 
-router.put("/:id", async (req, res) => {
+exports.updateHistoryByID = async (req, res) => {
   try {
     const updatedHistory = await historyService.updateHistoryByID(
       req.params.id,
@@ -54,11 +51,11 @@ router.put("/:id", async (req, res) => {
     console.log("[HISTORY]: %s \n %s", e, e.stack);
     res.status(500).json({ error: e.message });
   }
-});
+};
 
-router.delete("/:id", async (req, res) => {
+exports.deleteHistoryByID = async (req, res) => {
   try {
-    const deletedHistory = await historyService.deleteHistoryById(
+    const deletedHistory = await historyService.deleteHistoryByID(
       req.params.id
     );
     if (!deletedHistory)
@@ -70,6 +67,4 @@ router.delete("/:id", async (req, res) => {
     console.log("[HISTORY]: %s \n %s", e, e.stack);
     res.status(500).json({ error: e.message });
   }
-});
-
-module.exports = router;
+};
