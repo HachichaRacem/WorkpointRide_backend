@@ -8,9 +8,9 @@ const reservationSchema = new mongoose.Schema(
       required: true,
     },
 
-    planif: {
+    schedule: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Planif",
+      ref: "Schedule",
       required: true,
     },
     status: {
