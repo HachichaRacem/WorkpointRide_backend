@@ -12,10 +12,7 @@ exports.getAllSchedule = async (req, res) => {
 exports.getScheduleByUser = async (req, res) => {
   try {
     const schedule = await Schedulservices.getScheduleByUser(req.params.userID);
-    if (!schedule)
-      return res
-        .status(500)
-        .json({ error: "No schedule was found with that ID" });
+
     res.json(schedule);
   } catch (e) {
     console.log("[Schedule]: %s \n %s", e, e.stack);
@@ -70,8 +67,21 @@ exports.createSchedule = async (req, res) => {
 exports.getNearest = async (req, res) => {
   try {
     const newSchedule = await Schedulservices.findNearestPolyline(req.body);
-    if (!newSchedule)
-      return res.status(500).json({ error: "Could not create a new schedule" });
+
+    res.json({ status: "Created", schedule: newSchedule });
+  } catch (e) {
+    console.log("[Schedule]: %s \n %s", e, e.stack);
+    res.status(500).json({ error: e.message });
+  }
+};
+exports.getSchedulesWithReservations = async (req, res) => {
+  try {
+    const newSchedule =
+      await Schedulservices.getSchedulesWithReservationsByDate(
+        req.params.date,
+        req.params.userID
+      );
+
     res.json({ status: "Created", schedule: newSchedule });
   } catch (e) {
     console.log("[Schedule]: %s \n %s", e, e.stack);

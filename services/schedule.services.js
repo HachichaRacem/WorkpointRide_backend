@@ -161,39 +161,33 @@ exports.findNearestPolyline = async (body) => {
     throw error;
   }
 };
+exports.getSchedulesWithReservationsByDate = async (date, userID) => {
+  // Create date objects to cover the whole day from start to end
+  const newDate = new Date(date);
+  newDate.setHours(0, 0, 0, 0);
+  newDate.setDate(newDate.getDate() + 1);
 
-exports.getSchedulesWithReservations = async (req, res) => {
-  try {
-    const { date, time, routeId } = req.query;
-    const dateTime = new Date(`${date}T${time}`);
+  const schedules = await scheduleModel
+    .find({
+      user: userID,
+      scheduledDate: newDate,
+    })
+    .exec();
+  console.log("schedules", schedules);
+  // Make sure to call exec() to properly execute the query
+  // Attach reservations to each schedule
+  const schedulesWithReservations = await Promise.all(
+    schedules.map(async (schedule) => {
+      const reservations = await Reservation.find({ schedule: schedule._id })
+        .populate("user")
+        .exec();
+      console.log("reservations", reservations);
 
-    //nlawij 3al planif b filtre route ou wa9t
-    const schedules = await Schedule.find({
-      routesId: routeId,
-      startTime: {
-        $gte: new Date(dateTime),
-        $lt: new Date(dateTime.getTime() + 60000 * 60),
-      },
-    }).populate({
-      path: "userId",
-      select: "firstName lastName",
-    });
-
-    //chya3mil get lil reservation alli marbouta bil schedule mou3ayan
-    for (let schedule of schedules) {
-      schedule.reservations = await Reservation.find({
-        schedule: schedule._id,
-        pickupTime: {
-          $gte: new Date(dateTime),
-          $lt: new Date(dateTime.getTime() + 60000 * 60),
-        },
-      }).populate("user", "firstName ", "lastName", "phoneNumber");
-    }
-
-    res.json(schedules);
-  } catch (error) {
-    res
-      .status(500)
-      .json({ message: "Error fetching schedules and reservations", error });
-  }
+      return {
+        ...schedule.toObject(), // Convert mongoose document to a plain object
+        reservations,
+      };
+    })
+  );
+  return schedulesWithReservations;
 };
