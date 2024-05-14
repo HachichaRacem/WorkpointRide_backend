@@ -11,7 +11,7 @@ exports.getReservationByUser = async (userID) => {
 exports.createReservation = async (params) => {
   if (!params.user || !params.dayOfWeek || !params.pickupTime)
     throw Error("Request was sent with missing params");
-  const newRes = new resModel(params);
+  const newRes = new resModel.create(params);
   return await newRes.save();
 };
 

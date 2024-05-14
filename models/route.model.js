@@ -106,17 +106,15 @@ const RouteSchema = new mongoose.Schema(
     },
     type: {
       type: String,
-      enum: ["aller", "retour"],
+      enum: ["fromOffice", "toOffice"],
       required: true,
     },
-    polyline: [
-      {
-        latitude: { type: Number, required: true },
-        longitude: { type: Number, required: true },
-      },
-    ],
+    polyline: {
+      type: [[Number]], // Corrected type for polyline
+      required: true,
+    },
   },
-  { timestamps: true },
+  { timestamps: true }
 );
 
 // Indexes

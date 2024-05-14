@@ -5,7 +5,8 @@ const isAuth = require("../middleware/auth.middleware");
 
 router.post("/", isAuth, routeController.createRoute);
 router.get("/", isAuth, routeController.getAllRoutes);
-router.get("/:userID", isAuth, routeController.getRouteByUser);
+router.get("/nearest", isAuth, routeController.getNearestRoutes);
+router.get("/getByUser/:userID", routeController.getRouteByUser);
 router.put("/:id", isAuth, routeController.updateRouteByID);
 router.delete("/:id", isAuth, routeController.deleteRouteByID);
 

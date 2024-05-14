@@ -8,10 +8,19 @@ exports.getAllRoutes = async (req, res) => {
     res.status(500).json({ error: e.message });
   }
 };
+exports.getNearestRoutes = async (req, res) => {
+  try {
+    return res.json(await routeService.getNearestRoutes(req.params.body));
+  } catch (e) {
+    console.log("[ROUTE]: %s \n %s", e);
+    res.status(500).json({ error: e.message });
+  }
+};
 
 exports.getRouteByUser = async (req, res) => {
   try {
     const route = await routeService.getRouteByUser(req.params.userID);
+    console.log("route", route);
     if (!route)
       return res.status(500).json({ error: "No route was found with that ID" });
     res.json(route);

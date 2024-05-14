@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 
 const notificationSchema = new mongoose.Schema(
   {
-    userId: {
+    user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
@@ -15,12 +15,12 @@ const notificationSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    senderId: {
+    senderUser: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
     },
   },
-  { timestamps: true },
+  { timestamps: true }
 );
 
 const Notification = mongoose.model("Notification", notificationSchema);

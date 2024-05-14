@@ -5,7 +5,8 @@ const isAuth = require("../middleware/auth.middleware");
 
 router.get("/", isAuth, scheduleController.getAllSchedule);
 router.get("/:userID", isAuth, scheduleController.getScheduleByUser);
-router.post("/", isAuth, scheduleController.createSchedule);
+router.post("/add", scheduleController.createSchedule);
+router.post("/getNearest", scheduleController.getNearest);
 router.put("/:id", isAuth, scheduleController.updateScheduleByID);
 router.delete("/:id", isAuth, scheduleController.deleteScheduleByID);
 

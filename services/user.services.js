@@ -1,13 +1,16 @@
 const UserModel = require("../models/user.model");
+const userService = require("../services/user.services");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
-
+exports.getUser = async (email) => {
+  return await UserModel.findOne({ email });
+};
 // User login
 exports.loginUser = async (params) => {
   if (!params.email || !params.password) {
     throw Error("The request is missing the email or the password");
   }
-  const user = await getUser(params.email);
+  const user = await userService.getUser(params.email);
   if (!user) {
     throw Error("No account was found with this email");
   }

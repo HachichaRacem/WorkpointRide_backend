@@ -67,3 +67,14 @@ exports.createSchedule = async (req, res) => {
     res.status(500).json({ error: e.message });
   }
 };
+exports.getNearest = async (req, res) => {
+  try {
+    const newSchedule = await Schedulservices.findNearestPolyline(req.body);
+    if (!newSchedule)
+      return res.status(500).json({ error: "Could not create a new schedule" });
+    res.json({ status: "Created", schedule: newSchedule });
+  } catch (e) {
+    console.log("[Schedule]: %s \n %s", e, e.stack);
+    res.status(500).json({ error: e.message });
+  }
+};

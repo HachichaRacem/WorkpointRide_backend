@@ -2,12 +2,12 @@ const mongoose = require("mongoose");
 
 const scheduleSchema = new mongoose.Schema(
   {
-    userId: {
+    user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
     },
-    routesId: {
+    routes: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Routes",
       required: true,
@@ -16,7 +16,7 @@ const scheduleSchema = new mongoose.Schema(
       type: Date,
       required: true,
     },
-    daysOfWeek: {
+    scheduledDate: {
       type: Date,
       required: true,
     },
@@ -28,6 +28,6 @@ const scheduleSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-const Planif = mongoose.model("Schedule", scheduleSchema);
+const Schedule = mongoose.model("Schedule", scheduleSchema);
 
-module.exports = Planif;
+module.exports = Schedule;

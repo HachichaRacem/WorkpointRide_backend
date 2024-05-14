@@ -10,9 +10,9 @@ const historySchema = new mongoose.Schema(
     type: {
       type: String,
     },
-    planif: {
+    schedule: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Planif",
+      ref: "Schedule",
     },
     reservation: {
       type: mongoose.Schema.Types.ObjectId,

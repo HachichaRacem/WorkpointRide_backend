@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 
 const vehicleSchema = new mongoose.Schema(
   {
-    userId: {
+    user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
@@ -42,7 +42,7 @@ const vehicleSchema = new mongoose.Schema(
 
     // Add more attributes as needed
   },
-  { timestamps: true },
+  { timestamps: true }
 );
 
 const Vehicle = mongoose.model("Vehicle", vehicleSchema);
