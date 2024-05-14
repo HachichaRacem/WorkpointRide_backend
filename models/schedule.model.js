@@ -9,7 +9,7 @@ const scheduleSchema = new mongoose.Schema(
     },
     routes: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Routes",
+      ref: "Route",
       required: true,
     },
     startTime: {

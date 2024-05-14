@@ -6,13 +6,13 @@ exports.getAllReservations = async () => {
 
 exports.getReservationByUser = async (userID) => {
   if (!userID || userID.length != 24) throw Error("Invalid ID was sent");
-  return await resModel.findOne({ userId: userID });
+  return await resModel
+    .find({ user: userID })
+    .populate("user")
+    .populate("schedule");
 };
 exports.createReservation = async (params) => {
-  if (!params.user || !params.dayOfWeek || !params.pickupTime)
-    throw Error("Request was sent with missing params");
-  const newRes = new resModel.create(params);
-  return await newRes.save();
+  return await resModel.create(params);
 };
 
 exports.updateReservationByID = async (id, updates) => {

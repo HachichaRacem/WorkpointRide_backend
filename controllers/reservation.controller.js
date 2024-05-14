@@ -14,10 +14,7 @@ exports.getReservationByUser = async (req, res) => {
     const reservation = await resServices.getReservationByUser(
       req.params.userID
     );
-    if (!reservation)
-      return res
-        .status(500)
-        .json({ error: "No reservation was found with that ID" });
+
     res.json(reservation);
   } catch (e) {
     console.log("[RESERVATION]: %s \n %s", e, e.stack);

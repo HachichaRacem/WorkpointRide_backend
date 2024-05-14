@@ -2,7 +2,7 @@ const scheduleModel = require("../models/schedule.model");
 const routeModel = require("../models/route.model");
 
 exports.getAllSchedule = async () => {
-  return await scheduleModel.find();
+  return await scheduleModel.find().populate("user").populate("routes");
 };
 
 exports.getScheduleByUser = async (userID) => {
