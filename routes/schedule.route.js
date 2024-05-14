@@ -9,5 +9,6 @@ router.post("/add", scheduleController.createSchedule);
 router.post("/getNearest", scheduleController.getNearest);
 router.put("/:id", isAuth, scheduleController.updateScheduleByID);
 router.delete("/:id", isAuth, scheduleController.deleteScheduleByID);
+router.get('/schedules-with-reservations', scheduleController.getSchedulesWithReservations);
 
 module.exports = router;

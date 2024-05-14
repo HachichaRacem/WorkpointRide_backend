@@ -1,5 +1,6 @@
 const scheduleModel = require("../models/schedule.model");
 const routeModel = require("../models/route.model");
+const Reservation = require("../models/reservation.model");
 
 exports.getAllSchedule = async () => {
   return await scheduleModel.find().populate("user").populate("routes");
@@ -158,5 +159,41 @@ exports.findNearestPolyline = async (body) => {
   } catch (error) {
     console.error("Error finding nearest polyline:", error);
     throw error;
+  }
+};
+
+exports.getSchedulesWithReservations = async (req, res) => {
+  try {
+    const { date, time, routeId } = req.query;
+    const dateTime = new Date(`${date}T${time}`);
+
+    //nlawij 3al planif b filtre route ou wa9t
+    const schedules = await Schedule.find({
+      routesId: routeId,
+      startTime: {
+        $gte: new Date(dateTime),
+        $lt: new Date(dateTime.getTime() + 60000 * 60),
+      },
+    }).populate({
+      path: "userId",
+      select: "firstName lastName",
+    });
+
+    //chya3mil get lil reservation alli marbouta bil schedule mou3ayan
+    for (let schedule of schedules) {
+      schedule.reservations = await Reservation.find({
+        schedule: schedule._id,
+        pickupTime: {
+          $gte: new Date(dateTime),
+          $lt: new Date(dateTime.getTime() + 60000 * 60),
+        },
+      }).populate("user", "firstName ", "lastName", "phoneNumber");
+    }
+
+    res.json(schedules);
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Error fetching schedules and reservations", error });
   }
 };
