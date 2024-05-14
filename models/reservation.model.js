@@ -7,7 +7,6 @@ const reservationSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
-
     schedule: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Schedule",

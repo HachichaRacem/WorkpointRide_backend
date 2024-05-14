@@ -3,10 +3,10 @@ const router = express.Router();
 const isAuth = require("../middleware/auth.middleware");
 const reservationController = require("../controllers/reservation.controller");
 
-router.get("/", isAuth, reservationController.getAllReservations);
-router.get("/:userID", isAuth, reservationController.getReservationByUser);
-router.post("/", isAuth, reservationController.createReservation);
+router.get("/", reservationController.getAllReservations);
+router.get("/:userID", reservationController.getReservationByUser);
+router.post("/", reservationController.createReservation);
 router.put("/:id", isAuth, reservationController.updateReservationByID);
-router.delete("/:id", isAuth, reservationController.deleteReservationByID);
+router.delete("/:id", reservationController.deleteReservationByID);
 
 module.exports = router;

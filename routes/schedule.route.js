@@ -3,14 +3,16 @@ const router = express.Router();
 const scheduleController = require("../controllers/schedule.controller");
 const isAuth = require("../middleware/auth.middleware");
 
-router.get("/", isAuth, scheduleController.getAllSchedule);
+router.get("/", scheduleController.getAllSchedule);
 router.get("/:userID", isAuth, scheduleController.getScheduleByUser);
-router.post("/add", scheduleController.createSchedule);
-router.post("/getNearest", scheduleController.getNearest);
+router.post("/getNearest", isAuth, scheduleController.getNearest);
+router.post("/", isAuth, scheduleController.createSchedule);
 router.put("/:id", isAuth, scheduleController.updateScheduleByID);
+
 router.delete("/:id", isAuth, scheduleController.deleteScheduleByID);
 router.get(
   "/schedules-with-date/:date/:userID",
+  isAuth,
   scheduleController.getSchedulesWithReservations
 );
 

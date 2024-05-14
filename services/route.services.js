@@ -17,7 +17,7 @@ async function createRoute(params) {
 }
 
 async function getAllRoutes() {
-  return await routeModel.find();
+  return await routeModel.find().populate("user");
 }
 
 async function getRouteByUser(userID) {

@@ -36,6 +36,19 @@ exports.deleteScheduleByID = async (req, res) => {
   }
 };
 
+exports.getSchedulesWithReservationsByDate = async (req, res) => {
+  try {
+    const schedules = await Schedulservices.getSchedulesWithReservationsByDate(
+      req.params.date,
+      req.params.userID
+    );
+    res.json({ schedule: schedules });
+  } catch (e) {
+    console.log("[Schedule]: %s \n %s", e, e.stack);
+    res.status(500).json({ error: e.message });
+  }
+};
+
 exports.updateScheduleByID = async (req, res) => {
   try {
     const updatedSchedule = await Schedulservices.updateScheduleByID(

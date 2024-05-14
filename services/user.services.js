@@ -10,7 +10,7 @@ exports.loginUser = async (params) => {
   if (!params.email || !params.password) {
     throw Error("The request is missing the email or the password");
   }
-  const user = await userService.getUser(params.email);
+  const user = await UserModel.findOne({ email: params.email });
   if (!user) {
     throw Error("No account was found with this email");
   }
@@ -44,7 +44,7 @@ exports.registerUser = async (params) => {
   )
     throw Error("The request is missing one or more fields");
 
-  const userAlreadyExists = await getUser(params.email);
+  const userAlreadyExists = await UserModel.findOne({ email: params.email });
 
   if (userAlreadyExists) throw Error("User already exists");
 
