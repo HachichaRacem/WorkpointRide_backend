@@ -42,7 +42,7 @@ const vehicleSchema = new mongoose.Schema(
 
     // Add more attributes as needed
   },
-  { timestamps: true },
+  { timestamps: true }
 );
 
 const Vehicle = mongoose.model("Vehicle", vehicleSchema);

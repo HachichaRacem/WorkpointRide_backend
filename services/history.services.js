@@ -5,7 +5,11 @@ exports.getAllHistories = async () => {
 };
 
 exports.getHistoryByUser = async (userID) => {
-  return await historyModel.findOne({ user: userID });
+  return await historyModel
+    .find({ user: userID })
+    .populate("user")
+    .populate("schedule")
+    .populate("reservation");
 };
 
 exports.createHistory = async (params) => {

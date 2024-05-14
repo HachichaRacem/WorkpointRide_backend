@@ -2,14 +2,14 @@ const mongoose = require("mongoose");
 
 const scheduleSchema = new mongoose.Schema(
   {
-    userId: {
+    user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
     },
-    routesId: {
+    routes: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Routes",
+      ref: "Route",
       required: true,
     },
     startTime: {
