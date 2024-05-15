@@ -11,38 +11,6 @@ exports.getScheduleByUser = async (userID) => {
   return await scheduleModel.findOne({ userId: userID });
 };
 
-exports.getSchedulesWithReservationsByDate = async (date, userID) => {
-  // Create date objects to cover the whole day from start to end
-  const startOfDay = new Date(date);
-  startOfDay.setHours(0, 0, 0, 0);
-  const endOfDay = new Date(date);
-  endOfDay.setHours(23, 59, 59, 999);
-  // Fetch schedules for the given user and date range
-  const schedules = await scheduleModel
-    .find({
-      user: userID,
-      scheduledDate: {
-        $gte: startOfDay,
-        $lte: endOfDay,
-      },
-    })
-    .exec(); // Make sure to call exec() to properly execute the query
-  // Attach reservations to each schedule
-  const schedulesWithReservations = await Promise.all(
-    schedules.map(async (schedule) => {
-      const reservations = await resModel
-        .find({ schedule: schedule._id })
-        .populate("user")
-        .exec();
-      return {
-        ...schedule.toObject(), // Convert mongoose document to a plain object
-        reservations,
-      };
-    })
-  );
-  return schedulesWithReservations;
-};
-
 exports.createSchedule = async (params) => {
   try {
     console.log("params", params);
@@ -195,9 +163,13 @@ exports.findNearestPolyline = async (body) => {
 };
 exports.getSchedulesWithReservationsByDate = async (date, userID) => {
   // Create date objects to cover the whole day from start to end
+  console.log("date", date);
+  console.log("userID", userID);
+
   const newDate = new Date(date);
   newDate.setHours(0, 0, 0, 0);
   newDate.setDate(newDate.getDate() + 1);
+  console.log("newDate", newDate);
 
   const schedules = await scheduleModel
     .find({
@@ -205,7 +177,7 @@ exports.getSchedulesWithReservationsByDate = async (date, userID) => {
       scheduledDate: newDate,
     })
     .exec();
-  console.log("schedules", schedules);
+  // console.log("scheduleseeeeeeeeeeeeeeeee", schedules);
   // Make sure to call exec() to properly execute the query
   // Attach reservations to each schedule
   const schedulesWithReservations = await Promise.all(
