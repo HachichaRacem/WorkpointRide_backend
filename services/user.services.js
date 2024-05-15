@@ -18,9 +18,19 @@ exports.loginUser = async (params) => {
   if (!isMatch) {
     throw Error("Invalid password or email");
   }
-  const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
-    expiresIn: "1h",
-  });
+  const token = jwt.sign(
+    {
+      id: user._id,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      email: user.email,
+      phoneNumber: user.phoneNumber,
+    },
+    process.env.JWT_SECRET,
+    {
+      expiresIn: "12h",
+    }
+  );
   const refresh_token = jwt.sign(
     {
       id: user._id,
@@ -30,7 +40,7 @@ exports.loginUser = async (params) => {
       expiresIn: "1d",
     }
   );
-  return { user: user, accessToken: token, refreshToken: refresh_token };
+  return { accessToken: token, refreshToken: refresh_token };
 };
 
 // User register
