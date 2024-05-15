@@ -24,10 +24,20 @@ const scheduleSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
+    routeDirection: {
+      type: String,
+      required: true,
+    },
   },
   { timestamps: true }
 );
 
+scheduleSchema.index(
+  { user: 1, scheduledDate: 1, routeDirection :1 },
+  { unique: true, background: true }
+);
+
+scheduleSchema.plugin(require("mongoose-autopopulate"));
 const Schedule = mongoose.model("Schedule", scheduleSchema);
 
 module.exports = Schedule;

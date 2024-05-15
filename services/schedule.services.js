@@ -1,10 +1,24 @@
 const scheduleModel = require("../models/schedule.model");
 const routeModel = require("../models/route.model");
 const Reservation = require("../models/reservation.model");
+const NotificationService = require("./notification.services");
+const {
+  scheduleCancellationMail,
+  
+} = require("../template");
 
 exports.getAllSchedule = async () => {
   return await scheduleModel.find().populate("user").populate("routes");
 };
+
+
+// exports.getAllSchedule = async () => {
+//   schedules = await scheduleModel.find({
+//     _id : {$in : [ObjectId("663e3b8f285a747f85feef66"), ObjectId("6641d3bf99911b548d23180c")]}
+//   }.populate("user").populate("routes"));
+//   console.log(schedules);
+//   return schedules;//Amira filtrer le retour user
+// };
 
 exports.getScheduleByUser = async (userID) => {
   if (!userID || userID.length != 24) throw Error("Invalid ID was sent");
@@ -52,9 +66,46 @@ exports.updateScheduleByID = async (id, updates) => {
     Error("Request was sent with missing params");
   return await scheduleModel.findByIdAndUpdate(id, updates);
 };
+
 exports.deleteScheduleByID = async (id) => {
+ try {
   if (!id || id.length != 24) Error("Request was sent with missing params");
-  return await scheduleModel.findByIdAndDelete(id);
+  var schedule=await scheduleModel.findById(id).populate("user");
+  
+  var reservations = await Reservation.find({
+    schedule : id
+  })
+  .populate({
+    path : "user",
+    select : {firstName:1, lastName:1, email:1}
+  });
+  if (reservations.length>0){
+    for (const reservation of reservations) {
+
+      var text = await scheduleCancellationMail(
+        
+        schedule.user.firstName,
+        schedule.user.lastName,
+        schedule.scheduledDate,
+        schedule.startTime
+      );
+
+      await NotificationService.sendMail(
+        reservation.user,
+        "WorkPoint Ride Cancellation",
+        text
+      );
+      await Reservation.findByIdAndDelete(reservation._id);
+      
+    }
+    await scheduleModel.findByIdAndDelete(id);
+    return 200;
+  }
+  
+  } catch (error) {
+    console.error("Error while deleting schedule", error);
+    throw error;
+}
 };
 exports.findNearestPolyline = async (body) => {
   try {
@@ -183,10 +234,13 @@ exports.getSchedulesWithReservationsByDate = async (date, userID) => {
   const schedulesWithReservations = await Promise.all(
     schedules.map(async (schedule) => {
       const reservations = await Reservation.find({ schedule: schedule._id })
-        .populate("user")
+      .populate({
+        path : "user",
+        select : {firstName:1, lastName:1, phoneNumber:1}
+      })
         .exec();
       console.log("reservations", reservations);
-
+     
       return {
         ...schedule.toObject(), // Convert mongoose document to a plain object
         reservations,
