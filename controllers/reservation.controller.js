@@ -22,6 +22,19 @@ exports.getReservationByUser = async (req, res) => {
   }
 };
 
+exports.getReservationByDate = async (req, res) => {
+  try {
+    const reservations = await resServices.getReservationsByDate(
+      req.params.userID,
+      req.params.date
+    );
+    res.json(reservations);
+  } catch (e) {
+    console.log("[RESERVATION]: %s \n %s", e, e.stack);
+    res.status(500).json({ error: e.message });
+  }
+};
+
 exports.createReservation = async (req, res) => {
   try {
     const newRes = await resServices.createReservation(req.body);

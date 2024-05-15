@@ -11,6 +11,25 @@ exports.getReservationByUser = async (userID) => {
     .populate("user")
     .populate("schedule");
 };
+exports.getReservationsByDate = async (userID, date) => {
+  const startOfDay = new Date(date);
+  startOfDay.setHours(0, 0, 0, 0);
+  const endOfDay = new Date(date);
+  endOfDay.setHours(23, 59, 59, 999);
+  const reservations = await resModel
+    .find({
+      user: userID,
+      pickupTime: {
+        $gte: startOfDay,
+        $lte: endOfDay,
+      },
+    })
+    .populate("user")
+    .populate("schedule")
+    .exec();
+  return reservations;
+};
+
 exports.createReservation = async (params) => {
   return await resModel.create(params);
 };
