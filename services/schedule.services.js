@@ -27,11 +27,11 @@ exports.getScheduleByUser = async (userID) => {
 
 exports.createSchedule = async (params) => {
   try {
-    console.log("params", params);
+    //console.log("params", params);
 
     if (params.routeId == undefined) {
       //console.log("params", params);
-      console.log("routesId", params.routeId);
+      //console.log("routesId", params.routeId);
       var routeDirection = params.routeType;
       var route = await routeModel.create({
         user: params.user,
@@ -49,11 +49,15 @@ exports.createSchedule = async (params) => {
     }
     const schedules = [];
     for (const date of params.scheduledDate) {
+      
+      
+      newDate = new Date (date.substring(0, 10))
+      
       const schedule = new scheduleModel({
         user: params.user,
         routes: params.routeId ? params.routeId : route._id,
         startTime: params.startTime,
-        scheduledDate: date,
+        scheduledDate: newDate,
         availablePlaces: params.availablePlaces,
         routeDirection : routeDirection,
       });
@@ -77,7 +81,7 @@ exports.deleteScheduleByID = async (id) => {
  try {
   if (!id || id.length != 24) Error("Request was sent with missing params");
   var schedule=await scheduleModel.findById(id).populate("user");
-  
+ 
   var reservations = await Reservation.find({
     schedule : id
   })
@@ -85,7 +89,9 @@ exports.deleteScheduleByID = async (id) => {
     path : "user",
     select : {firstName:1, lastName:1, email:1}
   });
+  
   if (reservations.length>0){
+
     for (const reservation of reservations) {
 
       var text = await scheduleCancellationMail(
@@ -104,9 +110,13 @@ exports.deleteScheduleByID = async (id) => {
       await Reservation.findByIdAndDelete(reservation._id);
       
     }
-    await scheduleModel.findByIdAndDelete(id);
-    return 200;
+  
   }
+
+ 
+  await scheduleModel.findByIdAndDelete(id);
+  
+  return 200;
   
   } catch (error) {
     console.error("Error while deleting schedule", error);
