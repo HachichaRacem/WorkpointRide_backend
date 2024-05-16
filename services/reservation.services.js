@@ -22,17 +22,13 @@ exports.getReservationByUser = async (userID) => {
 
 exports.getReservationsByDate = async (userID, date) => {
   try {
-  const startOfDay = new Date(date);
-  startOfDay.setHours(0, 0, 0, 0);
-  const endOfDay = new Date(date);
-  endOfDay.setHours(23, 59, 59, 999);
+  
+  newDate = new Date (date.substring(0, 10))
   const reservations = await resModel
     .find({
       user: userID,
-      date: {
-        $gte: startOfDay,
-        $lte: endOfDay,
-      },
+      date : newDate,
+      
     })
     .populate({
       path : "user",
@@ -44,10 +40,12 @@ exports.getReservationsByDate = async (userID, date) => {
         path: "routes",
       },
     })
+   
     //.populate("user") 
     //.populate("schedule")
     .exec();
-    console.log('reservations',reservations)
+
+    
   return reservations;
 } catch (e) {
   console.log(e);

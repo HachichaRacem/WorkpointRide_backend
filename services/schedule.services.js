@@ -8,6 +8,7 @@ const {
 } = require("../template");
 
 exports.getAllSchedule = async () => {
+  console.log(await scheduleModel.find().populate("user").populate("routes"))
   return await scheduleModel.find().populate("user").populate("routes");
 };
 
@@ -85,10 +86,7 @@ exports.deleteScheduleByID = async (id) => {
   var reservations = await Reservation.find({
     schedule : id
   })
-  .populate({
-    path : "user",
-    select : {firstName:1, lastName:1, email:1}
-  });
+  
   
   if (reservations.length>0){
 
@@ -233,11 +231,11 @@ exports.getSchedulesWithReservationsByDate = async (date, userID) => {
   console.log("date", date);
   console.log("userID", userID);
 
-  const newDate = new Date(date);
-  newDate.setHours(0, 0, 0, 0);
-  newDate.setDate(newDate.getDate() + 1);
-  console.log("newDate", newDate);
-
+   const newDate = new Date(date);
+  // newDate.setHours(0, 0, 0, 0);
+  // newDate.setDate(newDate.getDate() + 1);
+  // console.log("newDate", newDate);
+  //newDate = new Date (date.substring(0, 10))
   const schedules = await scheduleModel
     .find({
       user: userID,
