@@ -30,8 +30,9 @@ exports.createSchedule = async (params) => {
     console.log("params", params);
 
     if (params.routeId == undefined) {
-      console.log("params", params);
+      //console.log("params", params);
       console.log("routesId", params.routeId);
+      var routeDirection = params.routeType;
       var route = await routeModel.create({
         user: params.user,
         startPoint: params.startPoint,
@@ -40,7 +41,11 @@ exports.createSchedule = async (params) => {
         distance: params.distance,
         type: params.routeType,
         polyline: params.polyline,
+        
       });
+    }else{
+      var route = await routeModel.findById(params.routeId)
+      var routeDirection = route.type;
     }
     const schedules = [];
     for (const date of params.scheduledDate) {
@@ -50,6 +55,7 @@ exports.createSchedule = async (params) => {
         startTime: params.startTime,
         scheduledDate: date,
         availablePlaces: params.availablePlaces,
+        routeDirection : routeDirection,
       });
       await schedule.save();
       schedules.push(schedule);
