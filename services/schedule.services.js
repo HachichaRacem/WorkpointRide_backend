@@ -85,7 +85,7 @@ exports.deleteScheduleByID = async (id) => {
  
   var reservations = await Reservation.find({
     schedule : id
-  })
+  }).populate("user")
   
   
   if (reservations.length>0){
@@ -101,10 +101,24 @@ exports.deleteScheduleByID = async (id) => {
       );
 
       await NotificationService.sendMail(
-        reservation.user,
+        reservation.user.email,
         "WorkPoint Ride Cancellation",
         text
       );
+
+      var notif = await NotificationService.createNotification({
+        receiver: reservation.user,
+        sender: schedule.user,
+        message:
+          schedule.user.firstName +
+          " " +
+          schedule.user.lastName +
+          " has cancelled ride on "+
+          schedule.scheduledDate +
+          " at "+
+          schedule.startTime,
+        title: "Ride cancellation",
+      });
       await Reservation.findByIdAndDelete(reservation._id);
       
     }

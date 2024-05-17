@@ -120,10 +120,24 @@ exports.deleteReservationByID = async (id) => {
       );
 
     await NotificationService.sendMail(
-        reservation.schedule.user,
+        reservation.schedule.user.email,
         "WorkPoint Ride Cancellation",
         text
       );
+
+    var notif = await NotificationService.createNotification({
+        receiver: reservation.schedule.user._id,
+        sender: reservation.user._id,
+        message:
+        reservation.user.firstName +
+          " " +
+          reservation.user.lastName +
+          " has cancelled reservation on "+
+          reservation.schedule.scheduledDate +
+          " at "+
+          reservation.schedule.startTime,
+        title: "Reservation cancellation",
+      });
     await resModel.findByIdAndDelete(id);
   return 200;
 } catch (e) {
