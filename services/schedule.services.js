@@ -2,16 +2,12 @@ const scheduleModel = require("../models/schedule.model");
 const routeModel = require("../models/route.model");
 const Reservation = require("../models/reservation.model");
 const NotificationService = require("./notification.services");
-const {
-  scheduleCancellationMail,
-  
-} = require("../template");
+const { scheduleCancellationMail } = require("../template");
 
 exports.getAllSchedule = async () => {
-  console.log(await scheduleModel.find().populate("user").populate("routes"))
+  console.log(await scheduleModel.find().populate("user").populate("routes"));
   return await scheduleModel.find().populate("user").populate("routes");
 };
-
 
 // exports.getAllSchedule = async () => {
 //   schedules = await scheduleModel.find({
@@ -42,25 +38,22 @@ exports.createSchedule = async (params) => {
         distance: params.distance,
         type: params.routeType,
         polyline: params.polyline,
-        
       });
-    }else{
-      var route = await routeModel.findById(params.routeId)
+    } else {
+      var route = await routeModel.findById(params.routeId);
       var routeDirection = route.type;
     }
     const schedules = [];
     for (const date of params.scheduledDate) {
-      
-      
-      newDate = new Date (date.substring(0, 10))
-      
+      newDate = new Date(date.substring(0, 10));
+
       const schedule = new scheduleModel({
         user: params.user,
         routes: params.routeId ? params.routeId : route._id,
         startTime: params.startTime,
         scheduledDate: newDate,
         availablePlaces: params.availablePlaces,
-        routeDirection : routeDirection,
+        routeDirection: routeDirection,
       });
       await schedule.save();
       schedules.push(schedule);
@@ -79,47 +72,39 @@ exports.updateScheduleByID = async (id, updates) => {
 };
 
 exports.deleteScheduleByID = async (id) => {
- try {
-  if (!id || id.length != 24) Error("Request was sent with missing params");
-  var schedule=await scheduleModel.findById(id).populate("user");
- 
-  var reservations = await Reservation.find({
-    schedule : id
-  })
-  
-  
-  if (reservations.length>0){
+  try {
+    if (!id || id.length != 24) Error("Request was sent with missing params");
+    var schedule = await scheduleModel.findById(id).populate("user");
 
-    for (const reservation of reservations) {
+    var reservations = await Reservation.find({
+      schedule: id,
+    });
 
-      var text = await scheduleCancellationMail(
-        
-        schedule.user.firstName,
-        schedule.user.lastName,
-        schedule.scheduledDate,
-        schedule.startTime
-      );
+    if (reservations.length > 0) {
+      for (const reservation of reservations) {
+        var text = await scheduleCancellationMail(
+          schedule.user.firstName,
+          schedule.user.lastName,
+          schedule.scheduledDate,
+          schedule.startTime
+        );
 
-      await NotificationService.sendMail(
-        reservation.user,
-        "WorkPoint Ride Cancellation",
-        text
-      );
-      await Reservation.findByIdAndDelete(reservation._id);
-      
+        await NotificationService.sendMail(
+          reservation.user,
+          "WorkPoint Ride Cancellation",
+          text
+        );
+        await Reservation.findByIdAndDelete(reservation._id);
+      }
     }
-  
-  }
 
- 
-  await scheduleModel.findByIdAndDelete(id);
-  
-  return 200;
-  
+    await scheduleModel.findByIdAndDelete(id);
+
+    return 200;
   } catch (error) {
     console.error("Error while deleting schedule", error);
     throw error;
-}
+  }
 };
 exports.findNearestPolyline = async (body) => {
   try {
@@ -231,7 +216,7 @@ exports.getSchedulesWithReservationsByDate = async (date, userID) => {
   console.log("date", date);
   console.log("userID", userID);
 
-   const newDate = new Date(date);
+  const newDate = new Date(date);
   // newDate.setHours(0, 0, 0, 0);
   // newDate.setDate(newDate.getDate() + 1);
   // console.log("newDate", newDate);
@@ -241,6 +226,7 @@ exports.getSchedulesWithReservationsByDate = async (date, userID) => {
       user: userID,
       scheduledDate: newDate,
     })
+    .populate("routes")
     .exec();
   // console.log("scheduleseeeeeeeeeeeeeeeee", schedules);
   // Make sure to call exec() to properly execute the query
@@ -248,13 +234,13 @@ exports.getSchedulesWithReservationsByDate = async (date, userID) => {
   const schedulesWithReservations = await Promise.all(
     schedules.map(async (schedule) => {
       const reservations = await Reservation.find({ schedule: schedule._id })
-      .populate({
-        path : "user",
-        select : {firstName:1, lastName:1, phoneNumber:1}
-      })
+        .populate({
+          path: "user",
+          select: { firstName: 1, lastName: 1, phoneNumber: 1 },
+        })
         .exec();
       console.log("reservations", reservations);
-     
+
       return {
         ...schedule.toObject(), // Convert mongoose document to a plain object
         reservations,
