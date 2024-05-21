@@ -2,6 +2,7 @@ const resModel = require("../models/reservation.model");
 const schedModel = require("../models/schedule.model");
 const routeModel = require("../models/route.model");
 const NotificationService = require("./notification.services");
+const historyModel= require("../models/history.model");
 const {
   reservationCancellationMail,
   scheduleCancellationMail
@@ -71,7 +72,7 @@ exports.createReservation = async (params) => {
       console.log("no available seats")
       throw new Error('Sorry, someone else booked the last seat'); 
    }else{
-    await resModel.create({
+    newReservation = await resModel.create({
       user : params.user,
       schedule : params.schedule,
       status : 'pending',
@@ -81,6 +82,21 @@ exports.createReservation = async (params) => {
       
     }
     );
+    var direction = (schedule.routes.type == "toOffice") ? "To office" : "From Office";
+    const history = new historyModel({
+      transaction : 'rideReservation',
+      user : params.user,
+      owner : params.user,
+      date : newStartTime,
+      direction : direction,
+      title: "Ride reservation",
+      color: "#0B7B59",
+      schedule : params.schedule,
+      reservation : newReservation._id,
+
+     }
+   )
+    await history.save();
     return 200          
      
    }
@@ -112,33 +128,51 @@ exports.deleteReservationByID = async (id) => {
       });
 
 
+   
+    await resModel.findByIdAndDelete(id);
     var text = await reservationCancellationMail(     
-        reservation.user.firstName,
-        reservation.user.lastName,
-        reservation.schedule.scheduledDate,
-        reservation.schedule.startTime
-      );
+      reservation.user.firstName,
+      reservation.user.lastName,
+      reservation.schedule.scheduledDate,
+      reservation.schedule.startTime
+    );
 
-    await NotificationService.sendMail(
-        reservation.schedule.user.email,
-        "WorkPoint Ride Cancellation",
-        text
-      );
+     await NotificationService.sendMail(
+      reservation.schedule.user.email,
+      "WorkPoint Ride Cancellation",
+      text
+    );
 
     var notif = await NotificationService.createNotification({
-        receiver: reservation.schedule.user._id,
-        sender: reservation.user._id,
-        message:
-        reservation.user.firstName +
-          " " +
-          reservation.user.lastName +
-          " has cancelled reservation on "+
-          reservation.schedule.scheduledDate +
-          " at "+
-          reservation.schedule.startTime,
-        title: "Reservation cancellation",
-      });
-    await resModel.findByIdAndDelete(id);
+      receiver: reservation.schedule.user._id,
+      sender: reservation.user._id,
+      message:
+      reservation.user.firstName +
+        " " +
+        reservation.user.lastName +
+        " has cancelled reservation on "+
+        reservation.schedule.scheduledDate +
+        " at "+
+        reservation.schedule.startTime,
+      title: "Reservation cancellation",
+    });
+    
+    var direction = (reservation.schedule.routeDirection == "toOffice") ? "To office" : "From Office";
+    const history = new historyModel({
+      transaction : 'reservationCancellation',
+      user : reservation.user,
+      owner : reservation.user,
+      date : reservation.schedule.startTime,
+      direction : direction,
+      title: "Reservation cancellation",
+      color: "#AD2A0E",
+      schedule : reservation.schedule._id,
+      reservation : reservation._id
+  
+     }
+   )
+    await history.save();
+
   return 200;
 } catch (e) {
   console.log(e);

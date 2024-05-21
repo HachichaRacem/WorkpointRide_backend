@@ -2,13 +2,14 @@ const scheduleModel = require("../models/schedule.model");
 const routeModel = require("../models/route.model");
 const Reservation = require("../models/reservation.model");
 const NotificationService = require("./notification.services");
+const historyModel= require("../models/history.model");
 const {
   scheduleCancellationMail,
   
 } = require("../template");
 
 exports.getAllSchedule = async () => {
-  console.log(await scheduleModel.find().populate("user").populate("routes"))
+  //console.log(await scheduleModel.find().populate("user").populate("routes"))
   return await scheduleModel.find().populate("user").populate("routes");
 };
 
@@ -48,21 +49,45 @@ exports.createSchedule = async (params) => {
       var route = await routeModel.findById(params.routeId)
       var routeDirection = route.type;
     }
+    
+    var direction = (routeDirection == "toOffice") ? "To office" : "From Office";
+    
     const schedules = [];
     for (const date of params.scheduledDate) {
       
       
-      newDate = new Date (date.substring(0, 10))
+      newDate = new Date (date.substring(0, 10));
       
+      newStartTime = new Date(params.startTime);
+      
+      newStartTime.setHours(newStartTime.getHours() + 1)
+      
+
       const schedule = new scheduleModel({
         user: params.user,
         routes: params.routeId ? params.routeId : route._id,
-        startTime: params.startTime,
+        startTime: newStartTime,
         scheduledDate: newDate,
         availablePlaces: params.availablePlaces,
         routeDirection : routeDirection,
       });
-      await schedule.save();
+
+      
+      var newSchedule = await schedule.save();
+
+      const history = new historyModel({
+        transaction : 'rideScheduling',
+        user : params.user,
+        owner : params.user,
+        date : newStartTime,
+        direction : direction,
+        title: "Ride scheduling",
+        color: "#0B7B59",
+        schedule : newSchedule._id,
+
+       }
+     )
+      await history.save();
       schedules.push(schedule);
     }
     return schedules;
@@ -86,7 +111,7 @@ exports.deleteScheduleByID = async (id) => {
   var reservations = await Reservation.find({
     schedule : id
   }).populate("user")
-  
+  var direction = (schedule.routeDirection == "toOffice") ? "To office" : "From Office";
   
   if (reservations.length>0){
 
@@ -120,13 +145,41 @@ exports.deleteScheduleByID = async (id) => {
         title: "Ride cancellation",
       });
       await Reservation.findByIdAndDelete(reservation._id);
+
+      const history = new historyModel({
+        transaction : 'reservationCancellation',
+        user : reservation.user,
+        owner : schedule.user._id,
+        date : schedule.startTime,
+        direction : direction,
+        title: "Reservation cancellation",
+        color: "#AD2A0E",
+        schedule : schedule._id,
+        reservation : reservation._id
+    
+       }
+     )
+      await history.save();
       
     }
   
   }
 
- 
+  
   await scheduleModel.findByIdAndDelete(id);
+  const history = new historyModel({
+    transaction : 'rideCancellation',
+    user : schedule.user._id,
+    owner : schedule.user._id,
+    date : schedule.startTime,
+    direction : direction,
+    title: "Ride cancellation",
+    color: "#AD2A0E",
+    schedule : schedule._id,
+
+   }
+ )
+  await history.save();
   
   return 200;
   
