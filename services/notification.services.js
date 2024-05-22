@@ -15,9 +15,24 @@ exports.createNotification = async (params) => {
   return await newNotification.save();
 };
 
-exports.deleteNotificationByID = async (id) => {
-  return await notificationModel.findByIdAndDelete(id);
+exports.createReservationCancellationNotification = async (params) => {
+  try {
+    var content = await notificationModel.create(params);
+    return content;
+
+  }catch (error) {
+    console.error("Error while adding notification", error);
+  throw error;
+}
 };
+
+exports.createNotification = async (params) => {
+
+  const newNotification = new notificationModel(params);
+  return await newNotification.save();
+};
+
+
 
 
 exports.sendMail = async (receiver, subject, textBody) => {
@@ -31,10 +46,10 @@ exports.sendMail = async (receiver, subject, textBody) => {
         pass: process.env.SERVER_PASSWORD,
       },
     });
+    console.log(receiver)
     const message = {
       from: process.env.SERVER_MAIL,
-      to: receiver.email,
-      //to: 'rawen.mersani@gmail.com',
+      to: receiver,
       subject: subject,
       text: `
             Hello ${receiver.firstname},
