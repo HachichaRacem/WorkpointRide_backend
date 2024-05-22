@@ -3,7 +3,7 @@ const NotificationService = require("./notification.services");
 const nodemailer = require("nodemailer");
 
 exports.getNotificationByUser = async (userID) => {
-  return await notificationModel.findOne({ userId: userID });
+  return await notificationModel.find({ receiver: userID });
 };
 
 exports.getAllNotifications = async () => {

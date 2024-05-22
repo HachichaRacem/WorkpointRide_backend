@@ -14,8 +14,7 @@ exports.getNotificationByUser = async (req, res) => {
     const notification = await notifServices.getNotificationByUser(
       req.params.userID
     );
-    if (!notification)
-      return res.status(404).json({ error: "No notification was found" });
+    
     res.json(notification);
   } catch (e) {
     console.log("[NOTIFICATION]: %s \n %s", e, e.stack);

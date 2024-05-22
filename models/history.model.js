@@ -1,3 +1,4 @@
+const { Int32 } = require("bson");
 const mongoose = require("mongoose");
 
 const historySchema = new mongoose.Schema(
@@ -34,6 +35,9 @@ const historySchema = new mongoose.Schema(
     },
 
     date :   {
+      type: Date,
+    },
+    time :   {
       type: Date,
     },
   },

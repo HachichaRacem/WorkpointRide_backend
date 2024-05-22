@@ -25,10 +25,7 @@ exports.getAllHistories = async (req, res) => {
 exports.getHistoryByUser = async (req, res) => {
   try {
     const history = await historyService.getHistoryByUser(req.params.userID);
-    if (!history)
-      return res
-        .status(404)
-        .json({ message: "No history was found with that ID" });
+    
     res.json(history);
   } catch (e) {
     console.log("[HISTORY]: %s \n %s", e, e.stack);
