@@ -27,7 +27,7 @@ const reservationSchema = new mongoose.Schema(
         enum: ["Point"],
       },
       coordinates: {
-        type: [Number]
+        type: [Number],
       },
     },
     date: {
@@ -43,7 +43,7 @@ const reservationSchema = new mongoose.Schema(
 );
 
 reservationSchema.index(
-  { user: 1, date: 1 , routeDirection :1 },
+  { user: 1, date: 1, routeDirection: 1 },
   { unique: true, background: true }
 );
 

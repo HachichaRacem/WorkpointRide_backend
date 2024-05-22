@@ -13,7 +13,6 @@ exports.getAllSchedule = async () => {
   return await scheduleModel.find().populate("user").populate("routes");
 };
 
-
 // exports.getAllSchedule = async () => {
 //   schedules = await scheduleModel.find({
 //     _id : {$in : [ObjectId("663e3b8f285a747f85feef66"), ObjectId("6641d3bf99911b548d23180c")]}
@@ -43,10 +42,9 @@ exports.createSchedule = async (params) => {
         distance: params.distance,
         type: params.routeType,
         polyline: params.polyline,
-        
       });
-    }else{
-      var route = await routeModel.findById(params.routeId)
+    } else {
+      var route = await routeModel.findById(params.routeId);
       var routeDirection = route.type;
     }
     
@@ -69,7 +67,7 @@ exports.createSchedule = async (params) => {
         startTime: newStartTime,
         scheduledDate: newDate,
         availablePlaces: params.availablePlaces,
-        routeDirection : routeDirection,
+        routeDirection: routeDirection,
       });
 
       
@@ -115,15 +113,18 @@ exports.deleteScheduleByID = async (id) => {
   
   if (reservations.length>0){
 
-    for (const reservation of reservations) {
+    var reservations = await Reservation.find({
+      schedule: id,
+    });
 
-      var text = await scheduleCancellationMail(
-        
-        schedule.user.firstName,
-        schedule.user.lastName,
-        schedule.scheduledDate,
-        schedule.startTime
-      );
+    if (reservations.length > 0) {
+      for (const reservation of reservations) {
+        var text = await scheduleCancellationMail(
+          schedule.user.firstName,
+          schedule.user.lastName,
+          schedule.scheduledDate,
+          schedule.startTime
+        );
 
       await NotificationService.sendMail(
         reservation.user.email,
@@ -162,8 +163,6 @@ exports.deleteScheduleByID = async (id) => {
       await history.save();
       
     }
-  
-  }
 
   
   await scheduleModel.findByIdAndDelete(id);
@@ -186,7 +185,7 @@ exports.deleteScheduleByID = async (id) => {
   } catch (error) {
     console.error("Error while deleting schedule", error);
     throw error;
-}
+  }
 };
 exports.findNearestPolyline = async (body) => {
   try {
@@ -298,7 +297,7 @@ exports.getSchedulesWithReservationsByDate = async (date, userID) => {
   console.log("date", date);
   console.log("userID", userID);
 
-   const newDate = new Date(date);
+  const newDate = new Date(date);
   // newDate.setHours(0, 0, 0, 0);
   // newDate.setDate(newDate.getDate() + 1);
   // console.log("newDate", newDate);
@@ -308,6 +307,7 @@ exports.getSchedulesWithReservationsByDate = async (date, userID) => {
       user: userID,
       scheduledDate: newDate,
     })
+    .populate("routes")
     .exec();
   // console.log("scheduleseeeeeeeeeeeeeeeee", schedules);
   // Make sure to call exec() to properly execute the query
@@ -315,13 +315,13 @@ exports.getSchedulesWithReservationsByDate = async (date, userID) => {
   const schedulesWithReservations = await Promise.all(
     schedules.map(async (schedule) => {
       const reservations = await Reservation.find({ schedule: schedule._id })
-      .populate({
-        path : "user",
-        select : {firstName:1, lastName:1, phoneNumber:1}
-      })
+        .populate({
+          path: "user",
+          select: { firstName: 1, lastName: 1, phoneNumber: 1 },
+        })
         .exec();
       console.log("reservations", reservations);
-     
+
       return {
         ...schedule.toObject(), // Convert mongoose document to a plain object
         reservations,
