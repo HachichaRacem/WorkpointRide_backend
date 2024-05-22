@@ -87,7 +87,7 @@ exports.createReservation = async (params) => {
       transaction : 'rideReservation',
       user : params.user,
       owner : params.user,
-      date : newStartTime,
+      date : params.pickupTime,
       direction : direction,
       title: "Ride reservation",
       color: "#0B7B59",

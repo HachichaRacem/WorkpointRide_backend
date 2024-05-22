@@ -10,7 +10,7 @@ router.get(
   "/reservation-by-date/:userID/:date",
   reservationController.getReservationByDate
 );
-router.post("/", reservationController.createReservation);
+router.post("/add", reservationController.createReservation);
 router.put("/:id", isAuth, reservationController.updateReservationByID);
 router.delete("/deleteReservationByID/:id", reservationController.deleteReservationByID);
 
