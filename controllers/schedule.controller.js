@@ -25,6 +25,7 @@ exports.deleteScheduleByID = async (req, res) => {
     const deletedSchedule = await Schedulservices.deleteScheduleByID(
       req.params.id
     );
+    
     if (!deletedSchedule)
       return res
         .status(500)

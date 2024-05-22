@@ -9,7 +9,7 @@ router.post("/getNearest", isAuth, scheduleController.getNearest);
 router.post("/add", isAuth, scheduleController.createSchedule);
 router.put("/:id", isAuth, scheduleController.updateScheduleByID);
 
-router.delete("/:id", isAuth, scheduleController.deleteScheduleByID);
+router.delete("/deleteScheduleByID/:id",  scheduleController.deleteScheduleByID);
 router.get(
   "/schedules-with-date/:date/:userID",
   isAuth,

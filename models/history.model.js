@@ -7,7 +7,18 @@ const historySchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
-    type: {
+    owner : {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+    transaction: {
+      type: String,
+    },
+    title : {
+      type: String,
+    },
+    color:{
       type: String,
     },
     schedule: {
@@ -18,9 +29,12 @@ const historySchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Reservation",
     },
-    status: {
+    direction : {
       type: String,
-      enum: ["upcoming", "completed", "canceled"],
+    },
+
+    date :   {
+      type: Date,
     },
   },
   { timestamps: true }
