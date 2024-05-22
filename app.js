@@ -22,7 +22,7 @@ app.use("/api/reservations", reservationRouter);
 app.use("/api/schedules", scheduleRouter);
 app.use("/api/vehicles", vehicleRouter);
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5030;
 
 mongoose
   .connect(process.env.DB_KEY)
