@@ -185,104 +185,121 @@ exports.deleteScheduleByID = async (id) => {
 };
 exports.findNearestPolyline = async (body) => {
   try {
-    const point = {
-      longitude: 36.67292,
-      latitude: 10.95815,
-    }; // Example point coordinates
-    const startDate = new Date("2023-01-01"); // Example scheduled date
-    const endDate = new Date("2026-01-01");
-    console.log("startDate", startDate);
+    console.log('bodyyyy',body)
+    var newDate = new Date (body.date.substring(0, 10));
+    
+    
+    var foundRoutes = await scheduleModel.find({
+      scheduledDate : newDate,
+      routeDirection : body.type
+    }
 
-    const nearestRoute = await scheduleModel.aggregate([
-      {
-        $match: {
-          scheduledDate: { $gte: startDate, $lte: endDate }, // Filter by scheduled date between two dates
-        },
-      },
-      {
-        $lookup: {
-          from: "routes",
-          localField: "routes",
-          foreignField: "_id",
-          as: "route",
-        },
-      },
-      {
-        $unwind: "$route",
-      },
-      {
-        $addFields: {
-          distances: {
-            $map: {
-              input: "$route.polyline",
-              as: "point",
-              in: {
-                $let: {
-                  vars: {
-                    lon1: { $arrayElemAt: ["$$point", 0] },
-                    lat1: { $arrayElemAt: ["$$point", 1] },
-                    lon2: point.longitude,
-                    lat2: point.latitude,
-                    earthRadius: 6371, // Earth radius in kilometers
-                  },
-                  in: {
-                    $multiply: [
-                      {
-                        $multiply: [
-                          {
-                            $sin: {
-                              $degreesToRadians: {
-                                $divide: [
-                                  { $subtract: ["$$lat2", "$$lat1"] },
-                                  2,
-                                ],
-                              },
-                            },
-                          },
-                          {
-                            $sin: {
-                              $degreesToRadians: {
-                                $divide: [
-                                  { $subtract: ["$$lon2", "$$lon1"] },
-                                  2,
-                                ],
-                              },
-                            },
-                          },
-                        ],
-                      },
-                      2,
-                      "$$earthRadius",
-                    ],
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
-      {
-        $project: {
-          user: 1,
-          routes: 1,
-          startTime: 1,
-          scheduledDate: 1,
-          availablePlaces: 1,
-          createdAt: 1,
-          updatedAt: 1,
-          __v: 1,
-          route: 1,
-          distance: { $min: "$distances" }, // Find the minimum distance from the distances array
-        },
-      },
-      {
-        $sort: { distance: 1 }, // Sort by distance in ascending order
-      },
-    ]);
+    ).populate({
+      path: "user",
+      select: { firstName: 1, lastName: 1, phoneNumber: 1 },
+    }).populate("routes");
 
-    console.log("nnnnnnn", nearestRoute);
+    console.log('foundRoutes', foundRoutes)
+
+    // const point = {
+    //   longitude: 36.67292,
+    //   latitude: 10.95815,
+    // }; // Example point coordinates
+    // const startDate = new Date("2023-01-01"); // Example scheduled date
+    // const endDate = new Date("2026-01-01");
+    // console.log("startDate", startDate);
+    
+    // const nearestRoute = await scheduleModel.aggregate([
+    //   {
+    //     $match: {
+    //       scheduledDate: { $gte: startDate, $lte: endDate }, // Filter by scheduled date between two dates
+    //     },
+    //   },
+    //   {
+    //     $lookup: {
+    //       from: "routes",
+    //       localField: "routes",
+    //       foreignField: "_id",
+    //       as: "route",
+    //     },
+    //   },
+    //   {
+    //     $unwind: "$route",
+    //   },
+    //   {
+    //     $addFields: {
+    //       distances: {
+    //         $map: {
+    //           input: "$route.polyline",
+    //           as: "point",
+    //           in: {
+    //             $let: {
+    //               vars: {
+    //                 lon1: { $arrayElemAt: ["$$point", 0] },
+    //                 lat1: { $arrayElemAt: ["$$point", 1] },
+    //                 lon2: point.longitude,
+    //                 lat2: point.latitude,
+    //                 earthRadius: 6371, // Earth radius in kilometers
+    //               },
+    //               in: {
+    //                 $multiply: [
+    //                   {
+    //                     $multiply: [
+    //                       {
+    //                         $sin: {
+    //                           $degreesToRadians: {
+    //                             $divide: [
+    //                               { $subtract: ["$$lat2", "$$lat1"] },
+    //                               2,
+    //                             ],
+    //                           },
+    //                         },
+    //                       },
+    //                       {
+    //                         $sin: {
+    //                           $degreesToRadians: {
+    //                             $divide: [
+    //                               { $subtract: ["$$lon2", "$$lon1"] },
+    //                               2,
+    //                             ],
+    //                           },
+    //                         },
+    //                       },
+    //                     ],
+    //                   },
+    //                   2,
+    //                   "$$earthRadius",
+    //                 ],
+    //               },
+    //             },
+    //           },
+    //         },
+    //       },
+    //     },
+    //   },
+    //   {
+    //     $project: {
+    //       user: 1,
+    //       routes: 1,
+    //       startTime: 1,
+    //       scheduledDate: 1,
+    //       availablePlaces: 1,
+    //       createdAt: 1,
+    //       updatedAt: 1,
+    //       __v: 1,
+    //       route: 1,
+    //       distance: { $min: "$distances" }, // Find the minimum distance from the distances array
+    //     },
+    //   },
+    //   {
+    //     $sort: { distance: 1 }, // Sort by distance in ascending order
+    //   },
+    // ]);
+
+    //console.log("nnnnnnn", nearestRoute);
     // Return the nearest polyline
-    return nearestRoute;
+    //return nearestRoute;
+    return foundRoutes;
   } catch (error) {
     console.error("Error finding nearest polyline:", error);
     throw error;
