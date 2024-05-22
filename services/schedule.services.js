@@ -112,13 +112,8 @@ exports.deleteScheduleByID = async (id) => {
   var direction = (schedule.routeDirection == "toOffice") ? "To office" : "From Office";
   
   if (reservations.length>0){
-
-    var reservations = await Reservation.find({
-      schedule: id,
-    });
-
-    if (reservations.length > 0) {
-      for (const reservation of reservations) {
+    
+    for (const reservation of reservations) {
         var text = await scheduleCancellationMail(
           schedule.user.firstName,
           schedule.user.lastName,
@@ -163,6 +158,7 @@ exports.deleteScheduleByID = async (id) => {
       await history.save();
       
     }
+  }
 
   
   await scheduleModel.findByIdAndDelete(id);
