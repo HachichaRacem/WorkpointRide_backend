@@ -2,11 +2,8 @@ const scheduleModel = require("../models/schedule.model");
 const routeModel = require("../models/route.model");
 const Reservation = require("../models/reservation.model");
 const NotificationService = require("./notification.services");
-const historyModel= require("../models/history.model");
-const {
-  scheduleCancellationMail,
-  
-} = require("../template");
+const historyModel = require("../models/history.model");
+const { scheduleCancellationMail } = require("../template");
 
 exports.getAllSchedule = async () => {
   //console.log(await scheduleModel.find().populate("user").populate("routes"))
@@ -28,9 +25,9 @@ exports.getScheduleByUser = async (userID) => {
 
 exports.createSchedule = async (params) => {
   try {
-    //console.log("params", params);
-
+    console.log("params", params);
     if (params.routeId == undefined) {
+      console.log("routeId is undefined");
       //console.log("params", params);
       //console.log("routesId", params.routeId);
       var routeDirection = params.routeType;
@@ -44,23 +41,23 @@ exports.createSchedule = async (params) => {
         polyline: params.polyline,
       });
     } else {
+      console.log("routeId is defined");
       var route = await routeModel.findById(params.routeId);
       var routeDirection = route.type;
     }
-    
-    var direction = (routeDirection == "toOffice") ? "To office" : "From Office";
-    
+
+    var direction = routeDirection == "toOffice" ? "To office" : "From Office";
+
+    console.log("routeDirection", direction);
+
     const schedules = [];
     for (const date of params.scheduledDate) {
-      
-      
-      newDate = new Date (date.substring(0, 10));
-      
-      newStartTime = new Date(params.startTime);
-      
-      newStartTime.setHours(newStartTime.getHours() + 1)
-      
+      newDate = new Date(date.substring(0, 10));
 
+      newStartTime = new Date(params.startTime);
+
+      newStartTime.setHours(newStartTime.getHours() + 1);
+      console.log("Scheduled date : ", newDate);
       const schedule = new scheduleModel({
         user: params.user,
         routes: params.routeId ? params.routeId : route._id,
@@ -70,22 +67,19 @@ exports.createSchedule = async (params) => {
         routeDirection: routeDirection,
       });
 
-      
       var newSchedule = await schedule.save();
 
       const history = new historyModel({
-        transaction : 'rideScheduling',
-        user : params.user,
-        owner : params.user,
-        date : newDate,
-        time: newStartTime ,
-        direction : direction,
+        transaction: "rideScheduling",
+        user: params.user,
+        owner: params.user,
+        date: newDate,
+        time: newStartTime,
+        direction: direction,
         title: "Ride scheduling",
         color: "#0B7B59",
-        schedule : newSchedule._id,
-
-       }
-     )
+        schedule: newSchedule._id,
+      });
       await history.save();
       schedules.push(schedule);
     }
@@ -103,18 +97,18 @@ exports.updateScheduleByID = async (id, updates) => {
 };
 
 exports.deleteScheduleByID = async (id) => {
- try {
-  if (!id || id.length != 24) Error("Request was sent with missing params");
-  var schedule=await scheduleModel.findById(id).populate("user");
- 
-  var reservations = await Reservation.find({
-    schedule : id
-  }).populate("user")
-  var direction = (schedule.routeDirection == "toOffice") ? "To office" : "From Office";
-  
-  if (reservations.length>0){
-    
-    for (const reservation of reservations) {
+  try {
+    if (!id || id.length != 24) Error("Request was sent with missing params");
+    var schedule = await scheduleModel.findById(id).populate("user");
+
+    var reservations = await Reservation.find({
+      schedule: id,
+    }).populate("user");
+    var direction =
+      schedule.routeDirection == "toOffice" ? "To office" : "From Office";
+
+    if (reservations.length > 0) {
+      for (const reservation of reservations) {
         var text = await scheduleCancellationMail(
           schedule.user.firstName,
           schedule.user.lastName,
@@ -122,65 +116,58 @@ exports.deleteScheduleByID = async (id) => {
           schedule.startTime
         );
 
-      await NotificationService.sendMail(
-        reservation.user.email,
-        "WorkPoint Ride Cancellation",
-        text
-      );
+        await NotificationService.sendMail(
+          reservation.user.email,
+          "WorkPoint Ride Cancellation",
+          text
+        );
 
-      var notif = await NotificationService.createNotification({
-        receiver: reservation.user,
-        sender: schedule.user,
-        message:
-          schedule.user.firstName +
-          " " +
-          schedule.user.lastName +
-          " has cancelled ride on "+
-          schedule.scheduledDate +
-          " at "+
-          schedule.startTime,
-        title: "Ride cancellation",
-      });
-      await Reservation.findByIdAndDelete(reservation._id);
+        var notif = await NotificationService.createNotification({
+          receiver: reservation.user,
+          sender: schedule.user,
+          message:
+            schedule.user.firstName +
+            " " +
+            schedule.user.lastName +
+            " has cancelled ride on " +
+            schedule.scheduledDate +
+            " at " +
+            schedule.startTime,
+          title: "Ride cancellation",
+        });
+        await Reservation.findByIdAndDelete(reservation._id);
 
-      const history = new historyModel({
-        transaction : 'reservationCancellation',
-        user : reservation.user,
-        owner : schedule.user._id,
-        date : schedule.scheduledDate,
-        time : schedule.startTime,
-        direction : direction,
-        title: "Reservation cancellation",
-        color: "#AD2A0E",
-        schedule : schedule._id,
-        reservation : reservation._id
-    
-       }
-     )
-      await history.save();
-      
+        const history = new historyModel({
+          transaction: "reservationCancellation",
+          user: reservation.user,
+          owner: schedule.user._id,
+          date: schedule.scheduledDate,
+          time: schedule.startTime,
+          direction: direction,
+          title: "Reservation cancellation",
+          color: "#AD2A0E",
+          schedule: schedule._id,
+          reservation: reservation._id,
+        });
+        await history.save();
+      }
     }
-  }
 
-  
-  await scheduleModel.findByIdAndDelete(id);
-  const history = new historyModel({
-    transaction : 'rideCancellation',
-    user : schedule.user._id,
-    owner : schedule.user._id,
-    date : schedule.scheduledDate,
-    time : schedule.startTime,
-    direction : direction,
-    title: "Ride cancellation",
-    color: "#AD2A0E",
-    schedule : schedule._id,
+    await scheduleModel.findByIdAndDelete(id);
+    const history = new historyModel({
+      transaction: "rideCancellation",
+      user: schedule.user._id,
+      owner: schedule.user._id,
+      date: schedule.scheduledDate,
+      time: schedule.startTime,
+      direction: direction,
+      title: "Ride cancellation",
+      color: "#AD2A0E",
+      schedule: schedule._id,
+    });
+    await history.save();
 
-   }
- )
-  await history.save();
-  
-  return 200;
-  
+    return 200;
   } catch (error) {
     console.error("Error while deleting schedule", error);
     throw error;
@@ -188,21 +175,28 @@ exports.deleteScheduleByID = async (id) => {
 };
 exports.findNearestPolyline = async (body) => {
   try {
-    console.log('bodyyyy',body)
-    var newDate = new Date (body.date.substring(0, 10));
-    
-    
-    var foundRoutes = await scheduleModel.find({
-      scheduledDate : newDate,
-      routeDirection : body.type
-    }
+    console.log("bodyyyy", body);
+    var newDate = new Date(body.date.substring(0, 10));
+    var maxDate = new Date(body.date);
+    maxDate.setHours(24, 59, 59, 999);
+    console.log("maxDate", maxDate);
 
-    ).populate({
-      path: "user",
-      select: { firstName: 1, lastName: 1, phoneNumber: 1 },
-    }).populate("routes");
+    console.log("newDate", newDate);
+    var foundRoutes = await scheduleModel
+      .find({
+        scheduledDate: {
+          $lte: maxDate,
+          $gte: newDate,
+        },
+        routeDirection: body.type,
+      })
+      .populate({
+        path: "user",
+        select: { firstName: 1, lastName: 1, phoneNumber: 1 },
+      })
+      .populate("routes");
 
-    console.log('foundRoutes', foundRoutes)
+    console.log("foundRoutes", foundRoutes);
 
     // const point = {
     //   longitude: 36.67292,
@@ -211,7 +205,7 @@ exports.findNearestPolyline = async (body) => {
     // const startDate = new Date("2023-01-01"); // Example scheduled date
     // const endDate = new Date("2026-01-01");
     // console.log("startDate", startDate);
-    
+
     // const nearestRoute = await scheduleModel.aggregate([
     //   {
     //     $match: {

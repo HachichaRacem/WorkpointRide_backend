@@ -2,11 +2,12 @@ const userService = require("../services/user.services");
 
 exports.getUser = async (req, res) => {
   try {
-    const email = req.params.email;
-    const user = await userService.getUser(email);
+    const id = req.params.id;
+    const user = await userService.getUser(id);
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
+    console.log("[USER]: %s", user);
     res.json(user);
   } catch (error) {
     console.log("[USER] : %s\n%s", error, error.stack);
@@ -37,14 +38,9 @@ exports.loginUser = async (req, res) => {
 
 exports.updateUser = async (req, res) => {
   try {
-    const updatedMember = await userService.updateUser(
-      req.params.email,
-      req.body
-    );
+    const updatedMember = await userService.updateUser(req.params.id, req.body);
     if (!updatedMember)
-      return res
-        .status(404)
-        .json({ error: "No user was found with that email" });
+      return res.status(404).json({ error: "No user was found with that ID" });
     return res.json({ status: "Updated", user: updatedUser });
   } catch (error) {
     console.log("[USER]: %s\n%s", error, error.stack);
@@ -54,11 +50,9 @@ exports.updateUser = async (req, res) => {
 
 exports.deleteUser = async (req, res) => {
   try {
-    const deletedUser = await userService.deleteUser(req.body);
+    const deletedUser = await userService.deleteUser(req.params.id);
     if (!deletedUser)
-      return res
-        .status(404)
-        .json({ error: "No user was found with that email" });
+      return res.status(404).json({ error: "No user was found with that ID" });
     return res.json({ status: "Deleted", user: deletedUser });
   } catch (error) {
     console.log("[USER]: %s\n%s", error, error.stack);

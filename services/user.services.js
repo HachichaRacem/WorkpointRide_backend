@@ -2,8 +2,10 @@ const UserModel = require("../models/user.model");
 const userService = require("../services/user.services");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
-exports.getUser = async (email) => {
-  return await UserModel.findOne({ email });
+
+exports.getUser = async (id) => {
+  console.log("userService - getUser : ID : ", id);
+  return await UserModel.findById(id, "-password");
 };
 // User login
 exports.loginUser = async (params) => {
@@ -72,18 +74,13 @@ exports.registerUser = async (params) => {
 };
 
 // Updating existing user
-exports.updateUser = async (email, updates) => {
-  if (!email || !updates) throw Error("Missing parameters");
-  return await UserModel.findOneAndUpdate({ email }, updates);
+exports.updateUser = async (id, updates) => {
+  if (!id || !updates) throw Error("Missing parameters");
+  return await UserModel.findByIdAndUpdate({ email: id }, updates);
 };
 
 // Deleting existing user
-exports.deleteUser = async (email) => {
-  if (!email) throw Error("Invalid email entered");
-  return await UserModel.findOneAndDelete({ email });
-};
-
-// Get user
-exports.getUser = async (email) => {
-  return await UserModel.findOne({ email });
+exports.deleteUser = async (id) => {
+  if (!id) throw Error("Invalid ID entered");
+  return await UserModel.findByIdAndDelete({ email: id });
 };

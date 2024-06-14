@@ -12,15 +12,14 @@ const shell = require("shelljs");
 const nodemailer = require("nodemailer");
 var bodyParser = require("body-parser");
 const mongoose = require("mongoose");
-
-
+const swaggerSpec = require("./swagger");
+const swaggerUI = require("swagger-ui-express");
 
 const routeRouter = require("./routes/route.route");
 const scheduleRouter = require("./routes/schedule.route");
 const historyRouter = require("./routes/history.route");
 const notificationRouter = require("./routes/notification.route");
 const reservationRouter = require("./routes/reservation.route");
-
 
 const vehicleRouter = require("./routes/vehicle.route");
 const userRouter = require("./routes/user.route");
@@ -29,6 +28,7 @@ var app = express();
 app.use(logger("dev"));
 app.use(express.json());
 
+app.use("/api-docs", swaggerUI.serve, swaggerUI.setup(swaggerSpec));
 app.use("/api/users", userRouter);
 app.use("/api/history", historyRouter);
 app.use("/api/routes", routeRouter);
@@ -130,4 +130,4 @@ mongoose
   .catch((error) => {
     console.error("Error connecting to database:", error);
   });
-  module.exports = app;
+module.exports = app;

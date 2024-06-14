@@ -32,10 +32,10 @@ const scheduleSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-scheduleSchema.index(
+/*scheduleSchema.index(
   { user: 1, scheduledDate: 1, routeDirection :1 },
   { unique: true, background: true }
-);
+);*/
 
 scheduleSchema.plugin(require("mongoose-autopopulate"));
 const Schedule = mongoose.model("Schedule", scheduleSchema);
